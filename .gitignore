@@ -1,0 +1,112 @@
+*.pdb
+*.dll
+*.cache
+*/obj/
+*/bin/
+/Easychit_Infrastructure/bin/
+/EasyChit/appsettings.json
+/Easychit_Infrastructure/obj/
+/EasyChit/bin/
+/EasyChit/obj/
+/Easychit_Repository/bin/
+/Easychit_Repository/obj/
+/EasyChit/Upload/*
+/EasyChit/Finsta_Exception_Logs/*
+/EasyChit/Log_Files/*
+/EasyChit/Log_Files/
+/EasyChit/bin/*
+/Easychit_Infrastructure/obj/*
+/Easychit_Infrastructure/bin/*
+/EasyChit/Properties/PublishProfiles/*
+
+# User-specific files
+
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+
+# Build results
+[Dd]ebug/
+debug/
+Debug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+
+# Visual Studio 2015/2017 cache/options directory
+.vs/
+
+# .NET Core
+
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+
+# Files built by Visual Studio
+
+*_i.c
+*_p.c
+*_h.h
+*.ilk
+*.meta
+*.obj
+*.iobj
+*.pch
+*.pdb
+*.ipdb
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp
+#*.tmp_proj
+#*_wpftmp.csproj
+*.log
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.svclog
+*.scc
+
+# Click-Once directory
+publish/
+
+# Publish Web Output
+*.[Pp]ublish.xml
+
+*.pubxml
+*.publishproj
+
+*.nuget.props
+*.nuget.targets
+
+# Visual Studio cache files
+
+*.[Cc]ache
+
+# Local History for Visual Studio
+.localhistory/
+
+# MSBuild Binary and Structured Log
+*.binlog
+PublishScripts/
+/node_modules/
+*.[lL]ock
+/EasyChit/appsettings.json
+*/appsettings.json
