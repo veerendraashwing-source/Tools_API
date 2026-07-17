@@ -41,7 +41,7 @@ namespace EasyChit
                 c.SwaggerDoc("v1", new OpenApiInfo
                 {
                     Version = "v1",
-                    Title = "Dar Inventory",
+                    Title = "EasyChit_Tools_API",
                     Description = "Sprint 1"
                 });
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme

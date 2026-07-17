@@ -1448,7 +1448,6 @@ namespace Easychit_Api.Controllers.ChangeDetails
 
                 string result = _easychittools.DeletepdoGuarantorDetails(branchSchema, chitGroupId, ticketNo, contactIds, guarantorMVOIds, Con);
 
-                // return Ok(result);
                 return Ok(new
                 {
                     message = "Deleted Successfully"
@@ -1606,6 +1605,54 @@ namespace Easychit_Api.Controllers.ChangeDetails
             try
             {
                 string result = _easychittools.DeleteMvoSvoSuretyDetails(branchSchema, GlobalSchema, groupCode, ticketNo, mvoSuretyId, chitGroupId, Con);
+
+                if (result == "Success")
+                {
+                    return Ok(result);
+                }
+                else
+                {
+                    return BadRequest(result);
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+         [HttpGet]
+        [Route("GetRECEIVEDDOCUMENT")]
+        public IActionResult GetRECEIVEDDOCUMENT(string BranchSchema, string GroupCode, long TicketNo)
+        {
+            try
+            {
+
+                var result = _easychittools.GetRECEIVEDDOCUMENT(BranchSchema, GlobalSchema, Con, GroupCode, TicketNo);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost]
+        [Route("DeleteKgmsMvoSvoDetails")]
+        public IActionResult DeleteKgmsMvoSvoDetails(string branchschema, string groupcode, long ticketno, bool filedownloadstatus)
+        {
+            try
+            {
+                string result = _easychittools.DeleteKgmsMvoSvoDetails(
+                    branchschema,
+                    GlobalSchema,
+                    groupcode,
+                    ticketno,
+                    filedownloadstatus,
+                    Con
+                );
 
                 if (result == "Success")
                 {

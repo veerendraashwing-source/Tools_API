@@ -260,5 +260,11 @@ int ticketno);
 
          string DeleteMvoSvoSuretyDetails(string branchSchema, string globalSchema, string groupCode, long ticketNo, long mvoSuretyId, long chitGroupId, string Conn);
 
+
+         List<RECEIVEDDOCUMENTDTO> GetRECEIVEDDOCUMENT(string branchSchema,string globalSchema, string connectionString, string groupCode, Int64 ticketNo);
+
+
+        string DeleteKgmsMvoSvoDetails(string branchSchema, string globalSchema, string groupCode, long ticketNo, bool fileDownloadStatus, string Conn);
+
     }
 }

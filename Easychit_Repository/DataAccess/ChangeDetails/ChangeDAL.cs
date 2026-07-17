@@ -16,7 +16,7 @@ namespace Easychit_Repository.DataAccess.ChangeDetails
     public class ChangeDAL : CommonDAL, Ichange
     {
         NpgsqlConnection con = new NpgsqlConnection(NPGSqlHelper.SQLConnString);
-        
+
 
         public List<BranchNamesDTO> GetBranchNames(string globalschema, string Conn)
         {
@@ -3494,7 +3494,7 @@ string panNumber, string globalschema)
             return message;
         }
 
-         public List<suretynotshwingdto> Getsuretyname(string branchSchema, string globalSchema, string branchCode, string groupCode, long ticketNo, string connectionString)
+        public List<suretynotshwingdto> Getsuretyname(string branchSchema, string globalSchema, string branchCode, string groupCode, long ticketNo, string connectionString)
         {
             List<suretynotshwingdto> list = new List<suretynotshwingdto>();
 
@@ -3574,7 +3574,7 @@ string panNumber, string globalschema)
         }
 
 
-         public string DeleteMvoSvoSuretyDetails(string branchSchema, string globalSchema, string groupCode, long ticketNo, long mvoSuretyId, long chitGroupId, string Conn)
+        public string DeleteMvoSvoSuretyDetails(string branchSchema, string globalSchema, string groupCode, long ticketNo, long mvoSuretyId, long chitGroupId, string Conn)
         {
             string message = "";
 
@@ -3587,7 +3587,7 @@ string panNumber, string globalschema)
                     StringBuilder sb = new StringBuilder();
 
                     // Delete from GLOBAL MVO Surety
-                   
+
 
                     // Delete from GLOBAL MVO Surety Details
                     string query1 = "DELETE FROM " + AddDoubleQuotes(globalSchema) + ".tbl_trans_mvo_surety_details WHERE tbl_trans_mvo_surety_id=" + mvoSuretyId + ";";
@@ -3624,11 +3624,105 @@ string panNumber, string globalschema)
                     Console.WriteLine(query7);
                     sb.Append(query7);
 
-                     string query8 = "DELETE FROM " + AddDoubleQuotes(globalSchema) + ".tbl_trans_mvo_surety WHERE groupcode='" + groupCode + "' AND ticketno=" + ticketNo + ";";
+                    string query8 = "DELETE FROM " + AddDoubleQuotes(globalSchema) + ".tbl_trans_mvo_surety WHERE groupcode='" + groupCode + "' AND ticketno=" + ticketNo + ";";
                     Console.WriteLine(query8);
                     sb.Append(query8);
 
 
+
+                    NpgsqlCommand cmd = new NpgsqlCommand(sb.ToString(), con);
+                    cmd.CommandTimeout = 0;
+                    cmd.ExecuteNonQuery();
+
+                    message = "Success";
+                }
+            }
+            catch (Exception ex)
+            {
+                message = ex.Message;
+            }
+
+            return message;
+        }
+
+        public List<RECEIVEDDOCUMENTDTO> GetRECEIVEDDOCUMENT(string branchSchema, string globalSchema, string connectionString, string groupCode, Int64 ticketNo)
+        {
+            List<RECEIVEDDOCUMENTDTO> list = new List<RECEIVEDDOCUMENTDTO>();
+
+            try
+            {
+                using (NpgsqlConnection con = new NpgsqlConnection(connectionString))
+                {
+                    con.Open();
+
+                    string qry = "SELECT e.subscriber_name,d.filled_surety_file,d.svofilledverfieddocument FROM " + AddDoubleQuotes(branchSchema) + ".tbl_mst_kgms_outward a LEFT JOIN " + AddDoubleQuotes(branchSchema) + ".tbl_mst_mvo_inward b ON b.mvo_outward_id = a.tbl_mst_kgms_outward_id LEFT JOIN " + AddDoubleQuotes(branchSchema) + ".tbl_mst_Svo_inward c ON c.svo_outward_id = a.tbl_mst_kgms_outward_id INNER JOIN " + AddDoubleQuotes(globalSchema) + ".tbl_trans_svo_surety_details d ON d.groupcode = a.groupcode AND d.ticketno = a.ticketno INNER JOIN " + AddDoubleQuotes(branchSchema) + ".tbl_mst_subscriber e ON e.chitgroup_id = d.chitgroup_id AND e.ticketno = d.ticketno WHERE a.groupcode = '" + groupCode + "' AND a.ticketno = " + ticketNo + ";";
+
+                    using (NpgsqlCommand cmd = new NpgsqlCommand(qry, con))
+                    {
+
+                        using (NpgsqlDataReader dr = cmd.ExecuteReader())
+                        {
+                            while (dr.Read())
+                            {
+
+                                list.Add(new RECEIVEDDOCUMENTDTO
+                                {
+                                    subscriber_name = Convert.ToString(dr["subscriber_name"]),
+                                    filled_surety_file = Convert.ToString(dr["filled_surety_file"]),
+                                    svofilledverfieddocument = Convert.ToString(dr["svofilledverfieddocument"])
+                                });
+
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return list;
+        }
+
+
+
+        public string DeleteKgmsMvoSvoDetails(string branchSchema, string globalSchema, string groupCode, long ticketNo, bool fileDownloadStatus, string Conn)
+        {
+            string message = "";
+
+            try
+            {
+                using (NpgsqlConnection con = new NpgsqlConnection(Conn))
+                {
+                    con.Open();
+
+                    StringBuilder sb = new StringBuilder();
+
+                    if (fileDownloadStatus)
+                    {
+                        string query1 = "UPDATE " + AddDoubleQuotes(globalSchema) + ".tbl_trans_svo_surety_details SET subscriberreceiveddate=NULL, subscribersubmitteddate=NULL, svo_kgms_receivedstatus=NULL, filedownloadstatus=NULL WHERE groupcode='" + groupCode + "' AND ticketno=" + ticketNo + ";";
+                        Console.WriteLine(query1);
+                        sb.Append(query1);
+                    }
+                    else
+                    {
+                        string query2 = "UPDATE " + AddDoubleQuotes(globalSchema) + ".tbl_trans_svo_surety_details SET subscriberreceiveddate=NULL, subscribersubmitteddate=NULL, svo_kgms_receivedstatus=NULL WHERE groupcode='" + groupCode + "' AND ticketno=" + ticketNo + ";";
+                        Console.WriteLine(query2);
+                        sb.Append(query2);
+                    }
+
+                    string query3 = "DELETE FROM " + AddDoubleQuotes(branchSchema) + ".tbl_mst_kgms_outward WHERE groupcode='" + groupCode + "' AND ticketno=" + ticketNo + ";";
+                    Console.WriteLine(query3);
+                    sb.Append(query3);
+
+                    string query4 = "DELETE FROM " + AddDoubleQuotes(branchSchema) + ".tbl_mst_mvo_inward WHERE groupcode='" + groupCode + "' AND ticketno=" + ticketNo + ";";
+                    Console.WriteLine(query4);
+                    sb.Append(query4);
+
+                    string query5 = "DELETE FROM " + AddDoubleQuotes(branchSchema) + ".tbl_mst_svo_inward WHERE groupcode='" + groupCode + "' AND ticketno=" + ticketNo + ";";
+                    Console.WriteLine(query5);
+                    sb.Append(query5);
 
                     NpgsqlCommand cmd = new NpgsqlCommand(sb.ToString(), con);
                     cmd.CommandTimeout = 0;

@@ -468,4 +468,12 @@ namespace Easychit_Infrastructure.ChangeDetails
         public Int64 tbl_trans_mvo_surety_id { get; set; }
     }
 
+
+     public class RECEIVEDDOCUMENTDTO
+    {
+        public string subscriber_name { get; set; }
+        public string filled_surety_file { get; set; }
+        public string svofilledverfieddocument { get; set; }
+    }
+
 }
