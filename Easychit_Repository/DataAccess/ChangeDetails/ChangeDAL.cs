@@ -8,24 +8,38 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Text;
 using Easychit_Repository.Interfaces.ChangeDetails;
-using Easychit_Infrastructure.Settings.Users;
-using Easychit_Repository.Interfaces.Security;
+using System.Diagnostics;
+
 
 namespace Easychit_Repository.DataAccess.ChangeDetails
 {
     public class ChangeDAL : CommonDAL, Ichange
     {
         NpgsqlConnection con = new NpgsqlConnection(NPGSqlHelper.SQLConnString);
+        
+
         public List<BranchNamesDTO> GetBranchNames(string globalschema, string Conn)
         {
             List<BranchNamesDTO> productionlist = new List<BranchNamesDTO>();
             string Query = string.Empty;
+
+            Stopwatch sw = new Stopwatch();
+
             try
             {
-                Query = "SELECT DISTINCT branch_name,tbl_mst_branch_configuration_id, branch_code, company_configuration_id FROM " + AddDoubleQuotes(globalschema) + ".tbl_mst_branch_configuration WHERE branch_name LIKE '%CAO%' AND branch_type='CAO';";
+                Query = "SELECT DISTINCT branch_name,tbl_mst_branch_configuration_id, branch_code, company_configuration_id FROM "
+                    + AddDoubleQuotes(globalschema)
+                    + ".tbl_mst_branch_configuration WHERE branch_name LIKE '%CAO%' AND branch_type='CAO';";
 
-                using (NpgsqlDataReader dr = NPGSqlHelper.ExecuteReader(Conn, System.Data.CommandType.Text, Query))
+                sw.Start();
+
+                using (NpgsqlDataReader dr = NPGSqlHelper.ExecuteReader(Conn, CommandType.Text, Query))
                 {
+                    sw.Stop();
+                    Console.WriteLine("ExecuteReader Time : " + sw.ElapsedMilliseconds + " ms");
+
+                    sw.Restart();
+
                     while (dr.Read())
                     {
                         BranchNamesDTO productionDTO = new BranchNamesDTO
@@ -35,14 +49,19 @@ namespace Easychit_Repository.DataAccess.ChangeDetails
                             company_configuration_id = Convert.ToInt32(dr["company_configuration_id"]),
                             tbl_mst_branch_configuration_id = Convert.ToInt32(dr["tbl_mst_branch_configuration_id"])
                         };
+
                         productionlist.Add(productionDTO);
                     }
+
+                    sw.Stop();
+                    Console.WriteLine("Reading Data Time : " + sw.ElapsedMilliseconds + " ms");
                 }
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw;
             }
+
             return productionlist;
         }
 
@@ -81,7 +100,7 @@ namespace Easychit_Repository.DataAccess.ChangeDetails
             string Query = string.Empty;
             try
             {
-                Query = "select distinct groupcode, chitgroup_id from " + AddDoubleQuotes(branchschema) + ".tbl_mst_subscriber x, " + AddDoubleQuotes(branchschema) + ".tbl_mst_chitgroup y where chitgroup_status in('Registered','Commenced') and x.chitgroup_id = y.tbl_mst_chitgroup_id;";
+                Query = "select distinct groupcode, chitgroup_id from " + AddDoubleQuotes(branchschema) + ".tbl_mst_subscriber x, " + AddDoubleQuotes(branchschema) + ".tbl_mst_chitgroup y where chitgroup_status in('Registered','Commenced','Completed') and x.chitgroup_id = y.tbl_mst_chitgroup_id;";
 
                 using (NpgsqlDataReader dr = NPGSqlHelper.ExecuteReader(Conn, System.Data.CommandType.Text, Query))
                 {
@@ -100,7 +119,6 @@ namespace Easychit_Repository.DataAccess.ChangeDetails
             {
                 throw ex;
             }
-
             return productionlist;
         }
 
@@ -1320,7 +1338,7 @@ namespace Easychit_Repository.DataAccess.ChangeDetails
                         }
                     }
 
-                    string qry = "SELECT b.general_receipt_number,b.interbranch_id,b.chitgroup_id,e.groupcode,f.contact_name,b.contact_id,b.ticketno,b.comman_receipt_number,d.receipt_date,d.receipt_number,g.transaction_no,g.reference_receipt_no,g.referencenumber,h.account_type,h.bank_entries_id,MAX(h.ledger_amount) AS ledger_amount FROM " + AddDoubleQuotes(globalschema) + ".tbl_mst_branch_configuration a INNER JOIN " + AddDoubleQuotes(branchschema) + ".tbl_trans_interbranch_receipt b ON a.tbl_mst_branch_configuration_id=b.branch_id INNER JOIN " + AddDoubleQuotes(branchschema) + ".tbl_trans_receipt_reference c ON c.receipt_number=b.comman_receipt_number::text INNER JOIN " + AddDoubleQuotes(caoschema) + ".tbl_trans_trim_data_details d ON c.reference_number=d.cheque_number INNER JOIN " + AddDoubleQuotes(caoschema) + ".tbl_mst_chitgroup e ON d.chitgroup_id=e.tbl_mst_chitgroup_id INNER JOIN " + AddDoubleQuotes(globalschema) + ".tbl_mst_contact f ON f.tbl_mst_contact_id=b.contact_id INNER JOIN " + AddDoubleQuotes(branchschema) + ".tbl_trans_bank_entries g ON c.reference_number=g.referencenumber AND c.receipt_number=g.reference_receipt_no INNER JOIN " + AddDoubleQuotes(branchschema) + ".tbl_trans_bank_entries_details h ON g.tbl_trans_bank_entries_id=h.bank_entries_id WHERE b.general_receipt_number='" + general_receipt_number + "' AND c.reference_number='" + reference_number + "' and d.trim_number='" + general_receipt_number + "' AND d.receipt_number IS NULL AND d.receipt_date IS NULL GROUP BY b.general_receipt_number,b.interbranch_id,b.chitgroup_id,e.groupcode,f.contact_name,b.contact_id,b.ticketno,b.comman_receipt_number,d.receipt_date,d.receipt_number,g.transaction_no,g.reference_receipt_no,g.referencenumber,h.account_type,h.bank_entries_id";
+                    string qry = "SELECT b.general_receipt_number,b.interbranch_id,b.chitgroup_id,e.groupcode,f.contact_name,b.contact_id,b.ticketno,b.comman_receipt_number,d.receipt_date,d.receipt_number,g.transaction_no,g.reference_receipt_no,g.referencenumber,h.account_type,h.bank_entries_id,MAX(h.ledger_amount) AS ledger_amount FROM " + AddDoubleQuotes(globalschema) + ".tbl_mst_branch_configuration a INNER JOIN " + AddDoubleQuotes(branchschema) + ".tbl_trans_interbranch_receipt b ON a.tbl_mst_branch_configuration_id=b.branch_id INNER JOIN " + AddDoubleQuotes(branchschema) + ".tbl_trans_receipt_reference c ON c.receipt_number=b.comman_receipt_number::text INNER JOIN " + AddDoubleQuotes(caoschema) + ".tbl_trans_trim_data_details d ON c.reference_number=d.cheque_number INNER JOIN " + AddDoubleQuotes(caoschema) + ".tbl_mst_chitgroup e ON d.chitgroup_id=e.tbl_mst_chitgroup_id INNER JOIN " + AddDoubleQuotes(globalschema) + ".tbl_mst_contact f ON f.tbl_mst_contact_id=b.contact_id INNER JOIN " + AddDoubleQuotes(branchschema) + ".tbl_trans_bank_entries g ON c.reference_number=g.referencenumber AND c.receipt_number=g.reference_receipt_no INNER JOIN " + AddDoubleQuotes(branchschema) + ".tbl_trans_bank_entries_details h ON g.tbl_trans_bank_entries_id=h.bank_entries_id WHERE b.general_receipt_number='" + general_receipt_number + "' AND c.reference_number='" + reference_number + "' and d.trim_number='" + general_receipt_number + "' AND d.receipt_number IS NULL AND d.receipt_date IS NULL GROUP BY b.general_receipt_number,b.interbranch_id,b.chitgroup_id,e.groupcode,f. contact_name,b.contact_id,b.ticketno,b.comman_receipt_number,d.receipt_date,d.receipt_number,g.transaction_no,g.reference_receipt_no,g.referencenumber,h.account_type,h.bank_entries_id";
 
                     using (NpgsqlCommand cmd = new NpgsqlCommand(qry, con))
                     {
@@ -2124,13 +2142,7 @@ string panNumber, string globalschema)
                         {
                             StringBuilder sb = new StringBuilder();
 
-                            // sb.Append("UPDATE " + AddDoubleQuotes(globalschema) + ".tbl_mst_contact SET pan_number='" + newPanNumber + "' WHERE contact_reference_id='" + contactReferenceId + "' AND pan_number='" + oldPanNumber + "';");
-                            // sb.Append("UPDATE " + AddDoubleQuotes(globalschema) + ".tbl_mst_contact SET pan_number='" + newPanNumber + "' WHERE contact_reference_id IN (" + contactReferenceIds + ") AND pan_number='" + oldPanNumber + "';");
 
-                            // sb.Append("UPDATE " + AddDoubleQuotes(globalschema) + ".tbl_mst_contact_documents SET document_reference_no='" + newPanNumber + "' WHERE contact_id=" + contactId + " AND tbl_mst_contact_documents_id IN (" + documentIds + ");");
-                            // sb.Append("UPDATE " + AddDoubleQuotes(globalschema) + ".tbl_mst_contact_documents SET document_reference_no='" + newPanNumber + "' WHERE contact_id IN (" + contactIds + ") AND tbl_mst_contact_documents_id IN (" + documentIds + ");");
-                            // sb.Append("UPDATE " + AddDoubleQuotes(branchschema) + ".tbl_trans_chit_advance SET pan_number='" + newPanNumber + "' WHERE contact_id=" + contactId + ";");
-                            // sb.Append("UPDATE " + AddDoubleQuotes(branchschema) + ".tbl_trans_chit_advance SET pan_number='" + newPanNumber + "' WHERE contact_id IN (" + contactIds + ");");
                             contactReferenceIds = "'" + contactReferenceIds.Replace(",", "','") + "'";
                             string qry1 = "UPDATE " + AddDoubleQuotes(globalschema) + ".tbl_mst_contact SET pan_number='" + newPanNumber + "' WHERE contact_reference_id IN (" + contactReferenceIds + ") AND pan_number='" + oldPanNumber + "';";
 
@@ -2436,7 +2448,7 @@ string panNumber, string globalschema)
         string branchschema,
         string globalschema,
         string groupcode,
-        int ticketno,string branch_code)
+        int ticketno, string branch_code)
         {
 
             List<reactiondatedto> lst = new List<reactiondatedto>();
@@ -2448,7 +2460,8 @@ string panNumber, string globalschema)
 
                     con.Open();
 
-                    string qry = "select c.subscriber_name,e.reauction_date,e.from_ticketno,e.to_ticketno,f.transaction_no,d.tbl_mst_contact_id,c.ticketno from " + AddDoubleQuotes(globalschema) + ".tbl_mst_branch_configuration a inner join " + AddDoubleQuotes(branchschema) + ".tbl_mst_chitgroup b on b.branch_id=a.tbl_mst_branch_configuration_id inner join " + AddDoubleQuotes(branchschema) + ".tbl_mst_subscriber c on c.chitgroup_id=b.tbl_mst_chitgroup_id and c.branch_id=a.tbl_mst_branch_configuration_id inner join " + AddDoubleQuotes(globalschema) + ".tbl_mst_contact d on d.tbl_mst_contact_id=c.contact_id inner join " + AddDoubleQuotes(branchschema) + ".tbl_trans_reauction_entry e on e.chitgroup_id=c.chitgroup_id and e.to_ticketno=c.ticketno inner join " + AddDoubleQuotes(branchschema) + ".tbl_trans_subscriber_jv f on e.tbl_trans_subscriber_jv_id=f.tbl_trans_subscriber_jv_id where a.branch_code='"+branch_code+"' and b.groupcode='"+groupcode+"' and c.ticketno="+ticketno+"";
+                    string qry = "select c.subscriber_name,e.reauction_date,e.from_ticketno,e.to_ticketno,f.transaction_no,d.tbl_mst_contact_id,c.ticketno from " + AddDoubleQuotes(globalschema) + ".tbl_mst_branch_configuration a inner join " + AddDoubleQuotes(branchschema) + ".tbl_mst_chitgroup b on b.branch_id=a.tbl_mst_branch_configuration_id inner join " + AddDoubleQuotes(branchschema) + ".tbl_mst_subscriber c on c.chitgroup_id=b.tbl_mst_chitgroup_id and c.branch_id=a.tbl_mst_branch_configuration_id inner join " + AddDoubleQuotes(globalschema) + ".tbl_mst_contact d on d.tbl_mst_contact_id=c.contact_id inner join " + AddDoubleQuotes(branchschema) + ".tbl_trans_reauction_entry e on e.chitgroup_id=c.chitgroup_id and e.to_ticketno=c.ticketno inner join " + AddDoubleQuotes(branchschema) + ".tbl_trans_subscriber_jv f on e.tbl_trans_subscriber_jv_id=f.tbl_trans_subscriber_jv_id where a.branch_code='" + branch_code + "' and b.groupcode='" + groupcode + "' and c.ticketno=" + ticketno + "";
+
 
                     Console.WriteLine(qry);
 
@@ -2481,10 +2494,14 @@ string panNumber, string globalschema)
             }
             return lst;
         }
+
+
+
+
         public List<reactiondatedto> GetreauctionDetails(
         string connectionString,
         string branchschema,
-        int from_ticketno,int to_ticketno)
+        int from_ticketno, int to_ticketno)
         {
 
             List<reactiondatedto> lst = new List<reactiondatedto>();
@@ -2496,7 +2513,7 @@ string panNumber, string globalschema)
 
                     con.Open();
 
-                    string qry = "select distinct b.bidjv_transaction_no,a.reauction_date,b.bidjv_transaction_date,d.transaction_date,d.receipt_number from " + AddDoubleQuotes(branchschema) + ".tbl_trans_reauction_entry a inner join " + AddDoubleQuotes(branchschema) + ".tbl_trans_bidjv b on b.chitgroup_id = a.chitgroup_id AND b.ticketno IN (a.from_ticketno, a.to_ticketno) inner join " + AddDoubleQuotes(branchschema) + ".tbl_trans_bidjv_details c on c.bidjv_id=b.tbl_trans_bidjv_id inner join " + AddDoubleQuotes(branchschema) + ".tbl_trans_gst_receipts d on d.receipt_number=b.bidjv_transaction_no where from_ticketno="+from_ticketno+" and to_ticketno="+to_ticketno+"";
+                    string qry = "select distinct b.bidjv_transaction_no,a.reauction_date,b.bidjv_transaction_date,d.transaction_date,d.receipt_number from " + AddDoubleQuotes(branchschema) + ".tbl_trans_reauction_entry a inner join " + AddDoubleQuotes(branchschema) + ".tbl_trans_bidjv b on b.chitgroup_id = a.chitgroup_id AND b.ticketno IN (a.from_ticketno, a.to_ticketno) inner join " + AddDoubleQuotes(branchschema) + ".tbl_trans_bidjv_details c on c.bidjv_id=b.tbl_trans_bidjv_id inner join " + AddDoubleQuotes(branchschema) + ".tbl_trans_gst_receipts d on d.receipt_number=b.bidjv_transaction_no where from_ticketno=" + from_ticketno + " and to_ticketno=" + to_ticketno + "";
 
                     Console.WriteLine(qry);
 
@@ -2525,9 +2542,10 @@ string panNumber, string globalschema)
             }
             return lst;
         }
+
         public List<reactiondatedto> Getreauctiondivdenddetails(
         string connectionString,
-        string branchschema,string transaction_no)
+        string branchschema, string transaction_no)
         {
 
             List<reactiondatedto> lst = new List<reactiondatedto>();
@@ -2539,7 +2557,7 @@ string panNumber, string globalschema)
 
                     con.Open();
 
-                    string qry = "SELECT distinct dividend_transaction_number, dividend_date FROM " + AddDoubleQuotes(branchschema) + ".tbl_trans_subscriber_jv a INNER JOIN " + AddDoubleQuotes(branchschema) + ".tbl_trans_subscriber_dividend b ON b.dividend_reference_number = a.transaction_no WHERE a.transaction_no = '"+transaction_no+"';";
+                    string qry = "SELECT distinct dividend_transaction_number, dividend_date FROM " + AddDoubleQuotes(branchschema) + ".tbl_trans_subscriber_jv a INNER JOIN " + AddDoubleQuotes(branchschema) + ".tbl_trans_subscriber_dividend b ON b.dividend_reference_number = a.transaction_no WHERE a.transaction_no = '" + transaction_no + "';";
 
                     Console.WriteLine(qry);
 
@@ -2565,5 +2583,1068 @@ string panNumber, string globalschema)
             }
             return lst;
         }
+
+
+        public string UpdateReauctionTransactionDates(string branchschema, long chitgroupid, long toticketno, long ticketno, string reauctiondate, string oldtransactiondate, string createddate, string subscriberjvno, string dividendtransactionnos, string bidjvtransactionnos, string Conn)
+        {
+            string message = "";
+            try
+            {
+                using (NpgsqlConnection con = new NpgsqlConnection(Conn))
+                {
+                    con.Open();
+
+                    StringBuilder sb = new StringBuilder();
+
+                    string query1 = "UPDATE " + AddDoubleQuotes(branchschema) +
+                                    ".tbl_trans_reauction_entry SET reauction_date='" + reauctiondate +
+                                    "' WHERE chitgroup_id=" + chitgroupid +
+                                    " AND to_ticketno=" + toticketno + ";";
+
+                    Console.WriteLine(query1);
+                    sb.Append(query1);
+
+                    string query2 = "UPDATE " + AddDoubleQuotes(branchschema) +
+                                    ".tbl_trans_subscriber_jv SET transaction_date='" + reauctiondate +
+                                    "' WHERE transaction_no='" + subscriberjvno +
+                                    "' AND transaction_date='" + oldtransactiondate + "';";
+
+                    Console.WriteLine(query2);
+                    sb.Append(query2);
+
+                    string query3 = "UPDATE " + AddDoubleQuotes(branchschema) +
+                                    ".tbl_trans_total_transactions SET transaction_date='" + reauctiondate +
+                                    "', created_date='" + createddate +
+                                    "' WHERE transaction_no='" + subscriberjvno +
+                                    "' AND transaction_date='" + oldtransactiondate + "';";
+
+                    Console.WriteLine(query3);
+                    sb.Append(query3);
+
+                    string query4 = "UPDATE " + AddDoubleQuotes(branchschema) +
+                                    ".tbl_trans_subscriber_dividend SET dividend_date='" + reauctiondate +
+                                    "' WHERE chitgroup_id=" + chitgroupid +
+                                    " AND ticketno=" + ticketno +
+                                    " AND dividend_date='" + oldtransactiondate +
+                                    "' AND dividend_transaction_number IN(" + dividendtransactionnos + ");";
+
+                    Console.WriteLine(query4);
+                    sb.Append(query4);
+
+                    string query5 = "UPDATE " + AddDoubleQuotes(branchschema) +
+                                    ".tbl_trans_auction_pslist SET last_reauction_date='" + reauctiondate +
+                                    "' WHERE chitgroup_id=" + chitgroupid +
+                                    " AND ticketno=" + toticketno + ";";
+
+                    Console.WriteLine(query5);
+                    sb.Append(query5);
+
+                    string query6 = "UPDATE " + AddDoubleQuotes(branchschema) +
+                                    ".tbl_trans_gst_receipts SET transaction_date='" + reauctiondate +
+                                    "' WHERE receipt_number IN(" + bidjvtransactionnos + ");";
+
+                    Console.WriteLine(query6);
+                    sb.Append(query6);
+
+                    string query7 = "UPDATE " + AddDoubleQuotes(branchschema) +
+                                    ".tbl_trans_bidjv SET bidjv_transaction_date='" + reauctiondate +
+                                    "' WHERE chitgroup_id=" + chitgroupid +
+                                    " AND ticketno IN(" + ticketno + "," + toticketno + ")" +
+                                    " AND bidjv_transaction_no IN(" + bidjvtransactionnos + ");";
+
+                    Console.WriteLine(query7);
+                    sb.Append(query7);
+
+                    string query8 = "UPDATE " + AddDoubleQuotes(branchschema) +
+                                    ".tbl_trans_total_transactions SET transaction_date='" + reauctiondate +
+                                    "', created_date='" + createddate +
+                                    "' WHERE transaction_no IN(" + dividendtransactionnos + ")" +
+                                    " AND transaction_date='" + oldtransactiondate + "';";
+
+                    Console.WriteLine(query8);
+                    sb.Append(query8);
+
+                    string query9 = "UPDATE " + AddDoubleQuotes(branchschema) +
+                                    ".tbl_trans_total_transactions SET transaction_date='" + reauctiondate +
+                                    "', created_date='" + createddate +
+                                    "' WHERE transaction_no IN(" + bidjvtransactionnos + ")" +
+                                    " AND transaction_date='" + oldtransactiondate + "';";
+
+                    Console.WriteLine(query9);
+                    sb.Append(query9);
+
+                    NpgsqlCommand cmd = new NpgsqlCommand(sb.ToString(), con);
+                    cmd.CommandTimeout = 0;
+                    cmd.ExecuteNonQuery();
+
+                    message = "Success";
+                }
+            }
+            catch (Exception ex)
+            {
+                message = ex.Message;
+            }
+
+            return message;
+        }
+
+        public List<guarantornamechangedto> GetnamechangeDetails(
+       string connectionString,
+       string branchschema,
+       string globalschema,
+       string groupcode,
+       int ticketno, string branch_code)
+        {
+
+            List<guarantornamechangedto> lst = new List<guarantornamechangedto>();
+
+            try
+            {
+                using (NpgsqlConnection con = new NpgsqlConnection(connectionString))
+                {
+
+                    con.Open();
+
+                    string qry = "select d.tbl_mst_contact_id,d.contact_name,d.contact_surname,d.contact_mailing_name,c.subscriber_name,e.guarantor_name,f.guarantor_name from " + AddDoubleQuotes(globalschema) + ".tbl_mst_branch_configuration a inner join " + AddDoubleQuotes(branchschema) + ".tbl_mst_chitgroup b on b.branch_id=a.tbl_mst_branch_configuration_id inner join " + AddDoubleQuotes(branchschema) + ".tbl_mst_subscriber c on c.chitgroup_id=b.tbl_mst_chitgroup_id and c.branch_id=a.tbl_mst_branch_configuration_id inner join " + AddDoubleQuotes(globalschema) + ".tbl_mst_contact d on d.tbl_mst_contact_id=c.contact_id inner join " + AddDoubleQuotes(branchschema) + ".tbl_mst_guarantor_mvo e on e.branch_id=a.tbl_mst_branch_configuration_id and e.chitgroup_id=b.tbl_mst_chitgroup_id and e.ticketno=c.ticketno and e.contact_id=d.tbl_mst_contact_id inner join " + AddDoubleQuotes(branchschema) + ".tbl_mst_guarantor f on f.contact_id=d.tbl_mst_contact_id where a.branch_code='" + branch_code + "' and b.groupcode='" + groupcode + "' and c.ticketno=" + ticketno + "";
+
+
+                    Console.WriteLine(qry);
+
+                    using (NpgsqlCommand cmd = new NpgsqlCommand(qry, con))
+                    {
+                        using (NpgsqlDataReader dr = cmd.ExecuteReader())
+                        {
+                            while (dr.Read())
+                            {
+
+                                guarantornamechangedto obj = new guarantornamechangedto();
+                                obj.subscriber_name = dr["subscriber_name"].ToString();
+                                obj.contact_name = dr["contact_name"].ToString();
+                                obj.contact_surname = dr["contact_surname"].ToString();
+                                obj.contact_mailing_name = dr["contact_mailing_name"].ToString();
+                                obj.guarantor_namemvo = dr["guarantor_name"].ToString();
+                                obj.guarantor_name = dr["guarantor_name"].ToString();
+                                obj.tbl_mst_contact_id = Convert.ToInt64(dr["tbl_mst_contact_id"]);
+
+                                lst.Add(obj);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            return lst;
+        }
+
+        public string UpdateSubscriberGuarantorName(string branchschema, string globalschema, long chitgroupid, long ticketno, long contactid, string contactname, string contactmailingname, string Conn, string contactsurname)
+        {
+            string message = "";
+            try
+            {
+                using (NpgsqlConnection con = new NpgsqlConnection(Conn))
+                {
+                    con.Open();
+
+                    StringBuilder sb = new StringBuilder();
+
+                    string query1 = "UPDATE " + AddDoubleQuotes(branchschema) + ".tbl_mst_guarantor_mvo " +
+                                    "SET guarantor_name='" + contactmailingname + "' " +
+                                    "WHERE chitgroup_id=" + chitgroupid +
+                                    " AND ticketno=" + ticketno +
+                                    " AND contact_id=" + contactid + ";";
+
+                    Console.WriteLine(query1);
+                    sb.Append(query1);
+
+                    string query2 = "UPDATE " + AddDoubleQuotes(branchschema) + ".tbl_mst_guarantor " +
+                                    "SET guarantor_name='" + contactmailingname + "' " +
+                                    "WHERE chitgroup_id=" + chitgroupid +
+                                    " AND ticketno=" + ticketno +
+                                    " AND contact_id=" + contactid + ";";
+
+                    Console.WriteLine(query2);
+                    sb.Append(query2);
+
+                    string query3 = "UPDATE " + AddDoubleQuotes(branchschema) + ".tbl_mst_subscriber " +
+                                    "SET subscriber_name='" + contactmailingname + "' " +
+                                    "WHERE chitgroup_id=" + chitgroupid +
+                                    " AND ticketno=" + ticketno +
+                                    " AND contact_id=" + contactid + ";";
+
+                    Console.WriteLine(query3);
+                    sb.Append(query3);
+
+                    string query4 = "UPDATE " + AddDoubleQuotes(globalschema) + ".tbl_mst_contact SET contact_name='" + contactname + "',contact_surname='" + contactsurname + "', contact_mailing_name='" + contactmailingname + "' WHERE tbl_mst_contact_id=" + contactid + ";";
+
+                    Console.WriteLine(query4);
+                    sb.Append(query4);
+
+                    NpgsqlCommand cmd = new NpgsqlCommand(sb.ToString(), con);
+                    cmd.CommandTimeout = 0;
+                    cmd.ExecuteNonQuery();
+
+                    message = "Success";
+                }
+            }
+            catch (Exception ex)
+            {
+                message = ex.Message;
+            }
+
+            return message;
+        }
+
+        // public List<GuarantorMvoDTO> GetGuarantorMvoDetails(string globalschema, string schema, string Conn, long chitgroupid, int ticketNo)
+        // {
+        //     List<GuarantorMvoDTO> list = new List<GuarantorMvoDTO>();
+        //     string Query = string.Empty;
+        //     try
+        //     {
+        //         Query = "SELECT g.tbl_mst_guarantor_mvo_id, g.contact_id, c.contact_name, c.contact_surname, c.contact_mailing_name FROM "
+        //               + AddDoubleQuotes(schema) + ".tbl_mst_guarantor_mvo g INNER JOIN "
+        //               + AddDoubleQuotes(globalschema) + ".tbl_mst_contact c ON g.contact_id = c.tbl_mst_contact_id "
+        //               + "WHERE g.chitgroup_id = " + chitgroupid + " AND g.ticketno = " + ticketNo + ";";
+
+        //         Console.WriteLine(Query);
+
+        //         using (NpgsqlDataReader dr = NPGSqlHelper.ExecuteReader(Conn, System.Data.CommandType.Text, Query))
+        //         {
+        //             while (dr.Read())
+        //             {
+        //                 GuarantorMvoDTO dto = new GuarantorMvoDTO();
+        //                 dto.TblMstGuarantorMvoId = Convert.ToInt64(dr["tbl_mst_guarantor_mvo_id"]);
+        //                 dto.ContactId = Convert.ToInt64(dr["contact_id"]);
+        //                 dto.GuarantorName = Convert.ToString(dr["contact_name"]);
+        //                 dto.GuarantorSurname = Convert.ToString(dr["contact_surname"]);
+        //                 dto.GuarantorMailingName = Convert.ToString(dr["contact_mailing_name"]);
+        //                 list.Add(dto);
+        //             }
+        //         }
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         throw ex;
+        //     }
+        //     return list;
+        // }
+
+        // public List<MvoAllotmentDTO> GetMvoAllotmentDetails(string schema, string Conn, List<long> guarantorMvoIds)
+        // {
+        //     List<MvoAllotmentDTO> list = new List<MvoAllotmentDTO>();
+        //     string Query = string.Empty;
+        //     try
+        //     {
+        //         if (guarantorMvoIds == null || guarantorMvoIds.Count == 0)
+        //             return list;
+
+        //         string idList = string.Join(",", guarantorMvoIds);
+
+        //         Query = "SELECT tbl_trans_mvo_allotment_id, tbl_mst_guarantor_mvo_id FROM "
+        //               + AddDoubleQuotes(schema) + ".tbl_trans_mvo_allotment "
+        //               + "WHERE tbl_mst_guarantor_mvo_id IN (" + idList + ");";
+
+        //         Console.WriteLine(Query);
+
+        //         using (NpgsqlDataReader dr = NPGSqlHelper.ExecuteReader(Conn, System.Data.CommandType.Text, Query))
+        //         {
+        //             while (dr.Read())
+        //             {
+        //                 MvoAllotmentDTO dto = new MvoAllotmentDTO();
+        //                 dto.TblTransMvoAllotmentId = Convert.ToInt64(dr["tbl_trans_mvo_allotment_id"]);
+        //                 dto.TblMstGuarantorMvoId = Convert.ToInt64(dr["tbl_mst_guarantor_mvo_id"]);
+        //                 list.Add(dto);
+        //             }
+        //         }
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         throw ex;
+        //     }
+        //     return list;
+        // }
+
+        // public bool DeleteMvoGuarantorRecords(string schema, string Conn, MvoGuarantorDeleteRequestDTO request)
+        // {
+        //     string Query = string.Empty;
+        //     try
+        //     {
+        //         if (request.GuarantorMvoIds == null || request.GuarantorMvoIds.Count == 0)
+        //             return false;
+
+        //         string contactIdList = string.Join(",", request.ContactIds);
+        //         string guarantorIdList = string.Join(",", request.GuarantorMvoIds);
+
+        //         // 1. Delete from tbl_mst_guarantor_mvo
+        //         Query = "DELETE FROM " + AddDoubleQuotes(schema) + ".tbl_mst_guarantor_mvo "
+        //               + "WHERE chitgroup_id = " + request.Chitgroupid
+        //               + " AND ticketno = " + request.Ticketno
+        //               + " AND contact_id IN (" + contactIdList + ");";
+
+        //         Console.WriteLine(Query);
+        //         NPGSqlHelper.ExecuteNonQuery(Conn, System.Data.CommandType.Text, Query);
+
+        //         // 2. Delete from tbl_trans_mvo_allotment
+        //         Query = "DELETE FROM " + AddDoubleQuotes(schema) + ".tbl_trans_mvo_allotment "
+        //               + "WHERE tbl_mst_guarantor_mvo_id IN (" + guarantorIdList + ");";
+
+        //         Console.WriteLine(Query);
+        //         NPGSqlHelper.ExecuteNonQuery(Conn, System.Data.CommandType.Text, Query);
+
+        //         return true;
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         throw ex;
+        //     }
+        // }
+
+        public List<GuarantorDTO> GetGuarantorDetails(string schema, string Conn, long chitgroupid, int ticketNo)
+        {
+            List<GuarantorDTO> list = new List<GuarantorDTO>();
+            string Query = string.Empty;
+            try
+            {
+                Query = "SELECT tbl_mst_guarantor_id, contact_id, guarantor_name FROM "
+                      + AddDoubleQuotes(schema) + ".tbl_mst_guarantor "
+                      + "WHERE chitgroup_id = " + chitgroupid + " AND ticketno = " + ticketNo + ";";
+
+                Console.WriteLine(Query);
+
+                using (NpgsqlDataReader dr = NPGSqlHelper.ExecuteReader(Conn, System.Data.CommandType.Text, Query))
+                {
+                    while (dr.Read())
+                    {
+                        GuarantorDTO dto = new GuarantorDTO();
+                        dto.TblMstGuarantorId = Convert.ToInt64(dr["tbl_mst_guarantor_id"]);
+                        dto.ContactId = Convert.ToInt64(dr["contact_id"]);
+                        dto.GuarantorName = Convert.ToString(dr["guarantor_name"]);
+                        list.Add(dto);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return list;
+        }
+
+        public List<GuarantorIncomeDTO> GetGuarantorIncomeDetails(string schema, string Conn, List<long> guarantorIds)
+        {
+            List<GuarantorIncomeDTO> list = new List<GuarantorIncomeDTO>();
+            string Query = string.Empty;
+            try
+            {
+                if (guarantorIds == null || guarantorIds.Count == 0)
+                    return list;
+
+                string idList = string.Join(",", guarantorIds);
+
+                Query = "SELECT tbl_mst_guarantor_income_id, guarantor_id FROM "
+                      + AddDoubleQuotes(schema) + ".tbl_mst_guarantor_income "
+                      + "WHERE guarantor_id IN (" + idList + ");";
+
+                Console.WriteLine(Query);
+
+                using (NpgsqlDataReader dr = NPGSqlHelper.ExecuteReader(Conn, System.Data.CommandType.Text, Query))
+                {
+                    while (dr.Read())
+                    {
+                        GuarantorIncomeDTO dto = new GuarantorIncomeDTO();
+                        dto.TblMstGuarantorIncomeId = Convert.ToInt64(dr["tbl_mst_guarantor_income_id"]);
+                        dto.GuarantorId = Convert.ToInt64(dr["guarantor_id"]);
+                        list.Add(dto);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return list;
+        }
+
+        public bool DeleteBpoGuarantorRecords(string schema, string Conn, BpoGuarantorDeleteRequestDTO request)
+        {
+            string Query = string.Empty;
+            try
+            {
+                if (request.GuarantorIds == null || request.GuarantorIds.Count == 0)
+                    return false;
+
+                string contactIdList = string.Join(",", request.ContactIds);
+                string guarantorIdList = string.Join(",", request.GuarantorIds);
+
+                // 1. Delete from tbl_mst_guarantor
+                Query = "DELETE FROM " + AddDoubleQuotes(schema) + ".tbl_mst_guarantor "
+                      + "WHERE chitgroup_id = " + request.Chitgroupid
+                      + " AND ticketno = " + request.Ticketno
+                      + " AND contact_id IN (" + contactIdList + ");";
+
+                Console.WriteLine(Query);
+                NPGSqlHelper.ExecuteNonQuery(Conn, System.Data.CommandType.Text, Query);
+
+                // 2. Delete from tbl_mst_guarantor_income
+                Query = "DELETE FROM " + AddDoubleQuotes(schema) + ".tbl_mst_guarantor_income "
+                      + "WHERE guarantor_id IN (" + guarantorIdList + ");";
+
+                Console.WriteLine(Query);
+                NPGSqlHelper.ExecuteNonQuery(Conn, System.Data.CommandType.Text, Query);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+
+        public List<GuarantorDTO1> GetGuarantormvoDetails(string branchSchema, string globalSchema, string branchCode, string groupCode, long ticketNo, string connectionString)
+        {
+            List<GuarantorDTO1> list = new List<GuarantorDTO1>();
+
+            try
+            {
+                using (NpgsqlConnection con = new NpgsqlConnection(connectionString))
+                {
+                    con.Open();
+
+                    string qry = "SELECT e.contact_id,e.guarantor_name, e.tbl_mst_guarantor_mvo_id FROM " + AddDoubleQuotes(globalSchema) + ".tbl_mst_branch_configuration a INNER JOIN " + AddDoubleQuotes(branchSchema) + ".tbl_mst_chitgroup b ON b.branch_id = a.tbl_mst_branch_configuration_id INNER JOIN " + AddDoubleQuotes(branchSchema) + ".tbl_mst_subscriber c ON c.chitgroup_id = b.tbl_mst_chitgroup_id AND c.branch_id = a.tbl_mst_branch_configuration_id INNER JOIN " + AddDoubleQuotes(globalSchema) + ".tbl_mst_contact d ON d.tbl_mst_contact_id = c.contact_id INNER JOIN " + AddDoubleQuotes(branchSchema) + ".tbl_mst_guarantor_mvo e ON e.branch_id = a.tbl_mst_branch_configuration_id AND e.chitgroup_id = b.tbl_mst_chitgroup_id AND e.ticketno = c.ticketno AND e.contact_id = d.tbl_mst_contact_id WHERE a.branch_code = '" + branchCode + "' AND b.groupcode = '" + groupCode + "' AND c.ticketno = " + ticketNo + ";";
+
+
+
+
+                    using (NpgsqlCommand cmd = new NpgsqlCommand(qry, con))
+                    {
+
+
+                        using (NpgsqlDataReader dr = cmd.ExecuteReader())
+                        {
+                            while (dr.Read())
+                            {
+                                list.Add(new GuarantorDTO1
+                                {
+                                    GuarantorName = dr["guarantor_name"].ToString(),
+                                    GuarantorId = Convert.ToInt64(dr["tbl_mst_guarantor_mvo_id"]),
+                                    contact_id = Convert.ToInt64(dr["contact_id"])
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return list;
+        }
+
+        public List<GuarantorDTO1> GetMVOReferenceIds(string branchSchema, long guarantorIds, string connectionString)
+        {
+            List<GuarantorDTO1> list = new List<GuarantorDTO1>();
+
+            try
+            {
+                using (NpgsqlConnection con = new NpgsqlConnection(connectionString))
+                {
+                    con.Open();
+
+                    //string qry = "SELECT b.v_reference_id FROM " + AddDoubleQuotes(branchSchema) + ".tbl_mst_guarantor_mvo WHERE tbl_mst_guarantor_mvo_id = ANY(" + string.Join(",", guarantorIds) + ") AND v_reference_id IS NOT NULL;";
+                    string qry = "select b.v_reference_id from " + AddDoubleQuotes(branchSchema) + ".tbl_mst_guarantor_mvo a inner join " + AddDoubleQuotes(branchSchema) + ".tbl_trans_mvo_allotment b on b.tbl_mst_guarantor_mvo_id=a.tbl_mst_guarantor_mvo_id where a.tbl_mst_guarantor_mvo_id in(" + guarantorIds + ") AND v_reference_id IS NOT NULL;";
+
+                    using (NpgsqlCommand cmd = new NpgsqlCommand(qry, con))
+                    {
+
+                        using (NpgsqlDataReader dr = cmd.ExecuteReader())
+                        {
+                            while (dr.Read())
+                            {
+                                if (dr["v_reference_id"] != DBNull.Value)
+                                {
+                                    list.Add(new GuarantorDTO1
+                                    {
+                                        v_reference_id = Convert.ToString(dr["v_reference_id"])
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return list;
+        }
+
+
+        public string DeleteGuarantorDetails(string branchSchema, long chitGroupId, long ticketNo, string contactIds, string guarantorMVOIds, string connectionString)
+        {
+            string message = "";
+
+            try
+            {
+                using (NpgsqlConnection con = new NpgsqlConnection(connectionString))
+                {
+                    con.Open();
+
+                    using (NpgsqlTransaction trans = con.BeginTransaction())
+                    {
+                        try
+                        {
+                            StringBuilder sb = new StringBuilder();
+
+                            sb.Append("DELETE FROM " + AddDoubleQuotes(branchSchema) + ".tbl_mst_guarantor_mvo WHERE chitgroup_id=" + chitGroupId + " AND ticketno=" + ticketNo + " AND contact_id IN(" + contactIds + ");");
+
+                            using (NpgsqlCommand cmd = new NpgsqlCommand(sb.ToString(), con, trans))
+                            {
+                                cmd.ExecuteNonQuery();
+                            }
+
+                            // sb.Clear();
+
+                            sb.Append("DELETE FROM " + AddDoubleQuotes(branchSchema) + ".tbl_trans_mvo_allotment WHERE tbl_mst_guarantor_mvo_id IN(" + guarantorMVOIds + ");");
+
+                            using (NpgsqlCommand cmd = new NpgsqlCommand(sb.ToString(), con, trans))
+                            {
+                                cmd.ExecuteNonQuery();
+                            }
+
+                            trans.Commit();
+                            message = "Deleted Successfully";
+                        }
+                        catch (Exception)
+                        {
+                            trans.Rollback();
+                            throw;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return message;
+        }
+
+
+
+        public List<bpoGuarantorDTO> GetGuarantorbpoDetails(string branchSchema, string globalSchema, string branchCode, string groupCode, long ticketNo, string connectionString)
+        {
+            List<bpoGuarantorDTO> list = new List<bpoGuarantorDTO>();
+
+            try
+            {
+                using (NpgsqlConnection con = new NpgsqlConnection(connectionString))
+                {
+                    con.Open();
+
+                    //string qry = "SELECT e.guarantor_name, e.tbl_mst_guarantor_mvo_id FROM " + AddDoubleQuotes(globalSchema) + ".tbl_mst_branch_configuration a INNER JOIN " + AddDoubleQuotes(branchSchema) + ".tbl_mst_chitgroup b ON b.branch_id = a.tbl_mst_branch_configuration_id INNER JOIN " + AddDoubleQuotes(branchSchema) + ".tbl_mst_subscriber c ON c.chitgroup_id = b.tbl_mst_chitgroup_id AND c.branch_id = a.tbl_mst_branch_configuration_id INNER JOIN " + AddDoubleQuotes(globalSchema) + ".tbl_mst_contact d ON d.tbl_mst_contact_id = c.contact_id INNER JOIN " + AddDoubleQuotes(branchSchema) + ".tbl_mst_guarantor_mvo e ON e.branch_id = a.tbl_mst_branch_configuration_id AND e.chitgroup_id = b.tbl_mst_chitgroup_id AND e.ticketno = c.ticketno AND e.contact_id = d.tbl_mst_contact_id WHERE a.branch_code = '" + branchCode + "' AND b.groupcode = '" + groupCode + "' AND c.ticketno = " + ticketNo + ";";
+                    string qry = "SELECT e.guarantor_name, e.tbl_mst_guarantor_id, e.contact_id FROM " + AddDoubleQuotes(globalSchema) + ".tbl_mst_branch_configuration a INNER JOIN " + AddDoubleQuotes(branchSchema) + ".tbl_mst_chitgroup b ON b.branch_id = a.tbl_mst_branch_configuration_id INNER JOIN " + AddDoubleQuotes(branchSchema) + ".tbl_mst_subscriber c ON c.chitgroup_id = b.tbl_mst_chitgroup_id AND c.branch_id = a.tbl_mst_branch_configuration_id INNER JOIN " + AddDoubleQuotes(branchSchema) + ".tbl_mst_guarantor e ON e.branch_id = a.tbl_mst_branch_configuration_id AND e.chitgroup_id = b.tbl_mst_chitgroup_id AND e.ticketno = c.ticketno INNER JOIN " + AddDoubleQuotes(globalSchema) + ".tbl_mst_contact d ON d.tbl_mst_contact_id = e.contact_id INNER JOIN " + AddDoubleQuotes(branchSchema) + ".tbl_mst_guarantor_income f ON f.guarantor_id = e.tbl_mst_guarantor_id WHERE a.branch_code = '" + branchCode + "' AND b.groupcode = '" + groupCode + "' AND c.ticketno = " + ticketNo + ";";
+
+
+
+
+                    using (NpgsqlCommand cmd = new NpgsqlCommand(qry, con))
+                    {
+
+
+                        using (NpgsqlDataReader dr = cmd.ExecuteReader())
+                        {
+                            while (dr.Read())
+                            {
+                                list.Add(new bpoGuarantorDTO
+                                {
+                                    GuarantorName = dr["guarantor_name"].ToString(),
+                                    GuarantorId = Convert.ToInt64(dr["tbl_mst_guarantor_id"]),
+                                    contact_id = Convert.ToInt64(dr["contact_id"])
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return list;
+        }
+
+
+        public string DeletepdoGuarantorDetails(string branchSchema, long chitGroupId, long ticketNo, string contactIds, string guarantorMVOIds, string connectionString)
+        {
+            string message = "";
+
+            try
+            {
+                using (NpgsqlConnection con = new NpgsqlConnection(connectionString))
+                {
+                    con.Open();
+
+                    using (NpgsqlTransaction trans = con.BeginTransaction())
+                    {
+                        try
+                        {
+                            StringBuilder sb = new StringBuilder();
+                            sb.Append("DELETE FROM " + AddDoubleQuotes(branchSchema) + ".tbl_mst_guarantor_income WHERE guarantor_id IN(" + guarantorMVOIds + ");");
+
+                            using (NpgsqlCommand cmd = new NpgsqlCommand(sb.ToString(), con, trans))
+                            {
+                                cmd.ExecuteNonQuery();
+                            }
+
+                            sb.Clear();
+
+                            sb.Append("delete from " + AddDoubleQuotes(branchSchema) + ".tbl_mst_guarantor WHERE chitgroup_id=" + chitGroupId + " AND ticketno=" + ticketNo + " AND contact_id IN(" + contactIds + ");");
+
+
+                            using (NpgsqlCommand cmd = new NpgsqlCommand(sb.ToString(), con, trans))
+                            {
+                                cmd.ExecuteNonQuery();
+                            }
+
+                            trans.Commit();
+                            message = "Deleted Successfully";
+                        }
+                        catch (Exception)
+                        {
+                            trans.Rollback();
+                            throw;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return message;
+        }
+
+
+        public List<finalsettlement> Getfinalsetlement(string branchSchema, string globalSchema, string groupCode, long ticketNo, string connectionString)
+        {
+            List<finalsettlement> list = new List<finalsettlement>();
+
+            try
+            {
+                using (NpgsqlConnection con = new NpgsqlConnection(connectionString))
+                {
+                    con.Open();
+
+
+                    string qry = "SELECT e.surety_name FROM " + AddDoubleQuotes(branchSchema) + ".tbl_mst_branch_outward a LEFT JOIN " + AddDoubleQuotes(branchSchema) + ".tbl_mst_bpo_inward b ON b.branch_outward_id = a.tbl_mst_branch_outward_id LEFT JOIN " + AddDoubleQuotes(branchSchema) + ".tbl_mst_bpo_outward c ON c.bpo_inward_id = b.tbl_mst_bpo_inward_id INNER JOIN " + AddDoubleQuotes(globalSchema) + ".tbl_trans_svo_surety_details d ON d.groupcode = a.groupcode AND d.ticketno = a.ticketno INNER JOIN " + AddDoubleQuotes(branchSchema) + ".tbl_trans_prized_subscriber_surety e ON e.chitgroup_id = d.chitgroup_id AND e.ticketno = d.ticketno WHERE a.groupcode = '" + groupCode + "' AND a.ticketno = " + ticketNo + " AND ((a.branch_outward_status = 'R' AND c.bpo_outward_status = 'R') OR (a.branch_outward_status = 'N'));";
+
+
+
+
+                    using (NpgsqlCommand cmd = new NpgsqlCommand(qry, con))
+                    {
+
+
+                        using (NpgsqlDataReader dr = cmd.ExecuteReader())
+                        {
+                            while (dr.Read())
+                            {
+                                list.Add(new finalsettlement
+                                {
+                                    surety_name = dr["surety_name"].ToString(),
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return list;
+        }
+
+        public List<finalsettlement> Getfinalsetlementdetails(string surety_name, string globalSchema, string groupCode, long ticketNo, string connectionString)
+        {
+            List<finalsettlement> list = new List<finalsettlement>();
+
+            try
+            {
+                using (NpgsqlConnection con = new NpgsqlConnection(connectionString))
+                {
+                    con.Open();
+
+                    finalsettlement obj = new finalsettlement();
+                    obj.surety_name = surety_name;
+
+                    bool hasGuarantor = false;
+
+                    string[] suretyList = surety_name.Split(',');
+
+                    foreach (string item in suretyList)
+                    {
+                        if (item.Trim().Equals("GUARANTOR", StringComparison.OrdinalIgnoreCase))
+                        {
+                            hasGuarantor = true;
+                            break;
+                        }
+                    }
+
+                    //================ FIRST MEMO ===================
+                    if (hasGuarantor)
+                    {
+                        string firstMemoQry = "SELECT authorized_by,approved_by,authorized_date,approved_date,file_name,approved_file_name FROM " + AddDoubleQuotes(globalSchema) + ".tbl_mst_first_memo WHERE groupcode='" + groupCode + "' AND ticketno=" + ticketNo;
+
+                        using (NpgsqlCommand cmd = new NpgsqlCommand(firstMemoQry, con))
+                        {
+                            using (NpgsqlDataReader dr = cmd.ExecuteReader())
+                            {
+                                while (dr.Read())
+                                {
+                                    obj.FirstMemo.Add(new FirstMemoDTO
+                                    {
+                                        authorized_by = dr["authorized_by"] == DBNull.Value ? (long?)null : Convert.ToInt64(dr["authorized_by"]),
+                                        approved_by = dr["approved_by"] == DBNull.Value ? (long?)null : Convert.ToInt64(dr["approved_by"]),
+                                        authorized_date = dr["authorized_date"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(dr["authorized_date"]),
+                                        approved_date = dr["approved_date"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(dr["approved_date"]),
+                                        file_name = dr["file_name"].ToString(),
+                                        approved_file_name = dr["approved_file_name"].ToString()
+                                    });
+                                }
+                            }
+                        }
+                    }
+
+                    //================ FINAL MEMO ===================
+                    string finalMemoQry = "SELECT authorized_by,approved_by,authorized_date,approved_date,file_name,approved_file_name FROM " + AddDoubleQuotes(globalSchema) + ".tbl_mst_final_memo WHERE groupcode='" + groupCode + "' AND ticketno=" + ticketNo;
+
+                    using (NpgsqlCommand cmd = new NpgsqlCommand(finalMemoQry, con))
+                    {
+                        using (NpgsqlDataReader dr = cmd.ExecuteReader())
+                        {
+                            while (dr.Read())
+                            {
+                                obj.FinalMemo.Add(new FinalMemoDTO
+                                {
+                                    authorized_by = dr["authorized_by"] == DBNull.Value ? (long?)null : Convert.ToInt64(dr["authorized_by"]),
+                                    approved_by = dr["approved_by"] == DBNull.Value ? (long?)null : Convert.ToInt64(dr["approved_by"]),
+                                    authorized_date = dr["authorized_date"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(dr["authorized_date"]),
+                                    approved_date = dr["approved_date"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(dr["approved_date"]),
+                                    file_name = dr["file_name"].ToString(),
+                                    approved_file_name = dr["approved_file_name"].ToString()
+                                });
+                            }
+                        }
+                    }
+
+                    list.Add(obj);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return list;
+        }
+
+        public string DeleteFinalMemoDetails(string branchSchema, string globalSchema, long chitGroupId, long ticketNo, string groupCode, string Conn)
+        {
+            string message = "";
+
+            try
+            {
+                using (NpgsqlConnection con = new NpgsqlConnection(Conn))
+                {
+                    con.Open();
+
+                    StringBuilder sb = new StringBuilder();
+
+                    string query1 = "DELETE FROM " + AddDoubleQuotes(globalSchema) + ".tbl_mst_final_memo WHERE groupcode='" + groupCode + "' AND ticketno=" + ticketNo + ";";
+
+                    Console.WriteLine(query1);
+                    sb.Append(query1);
+
+                    string query2 = "DELETE FROM " + AddDoubleQuotes(branchSchema) + ".tbl_trans_prized_subscriber_surety WHERE chitgroup_id=" + chitGroupId + " AND ticketno=" + ticketNo + ";";
+
+                    Console.WriteLine(query2);
+                    sb.Append(query2);
+
+                    string query3 = "UPDATE " + AddDoubleQuotes(globalSchema) + ".tbl_trans_svo_surety_details SET handover_date=NULL, final_memo_written_by=NULL, document_approved_date=NULL, remarks=NULL, documentapprovalstatus=NULL, bpo_transfer_date=NULL, first_memo_status=NULL, final_memo_status=NULL WHERE groupcode='" + groupCode + "' AND ticketno=" + ticketNo + ";";
+
+                    Console.WriteLine(query3);
+                    sb.Append(query3);
+
+                    NpgsqlCommand cmd = new NpgsqlCommand(sb.ToString(), con);
+                    cmd.CommandTimeout = 0;
+                    cmd.ExecuteNonQuery();
+
+                    message = "Success";
+                }
+            }
+            catch (Exception ex)
+            {
+                message = ex.Message;
+            }
+
+            return message;
+        }
+
+        public List<chitcanceldto> Getchitpledgecancel(string branchSchema, string globalSchema, string groupCode, long ticketNo, string connectionString)
+        {
+            List<chitcanceldto> list = new List<chitcanceldto>();
+
+            try
+            {
+                using (NpgsqlConnection con = new NpgsqlConnection(connectionString))
+                {
+                    con.Open();
+
+
+                    string qry = "select distinct a.NPS_GROUPCODE from " + AddDoubleQuotes(globalSchema) + ".tbl_trans_chit_pledge a left join " + AddDoubleQuotes(branchSchema) + ".tbl_trans_chit_pledge b on b.ps_ticketno=a.ps_ticketno and b.ps_groupcode=a.ps_groupcode where a.ps_groupcode='" + groupCode + "' and a.ps_ticketno=" + ticketNo + " ";
+
+
+
+
+                    using (NpgsqlCommand cmd = new NpgsqlCommand(qry, con))
+                    {
+
+
+                        using (NpgsqlDataReader dr = cmd.ExecuteReader())
+                        {
+                            while (dr.Read())
+                            {
+                                list.Add(new chitcanceldto
+                                {
+                                    NPS_GROUPCODE = dr["NPS_GROUPCODE"].ToString(),
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return list;
+        }
+
+        public string DeleteChitPledgeAndSecurityLienDetails(string branchSchema, string globalSchema, string psGroupCode, long psTicketNo, string npsGroupCode, string Conn)
+        {
+            string message = "";
+
+            try
+            {
+                using (NpgsqlConnection con = new NpgsqlConnection(Conn))
+                {
+                    con.Open();
+
+                    StringBuilder sb = new StringBuilder();
+
+                    // Delete from GLOBAL Chit Pledge
+                    string query1 = "DELETE FROM " + AddDoubleQuotes(globalSchema) + ".tbl_trans_chit_pledge WHERE ps_groupcode='" + psGroupCode + "' AND ps_ticketno=" + psTicketNo + " AND nps_groupcode='" + npsGroupCode + "';";
+
+                    Console.WriteLine(query1);
+                    sb.Append(query1);
+
+                    // Delete from Branch Chit Pledge
+                    string query2 = "DELETE FROM " + AddDoubleQuotes(branchSchema) + ".tbl_trans_chit_pledge WHERE ps_groupcode='" + psGroupCode + "' AND ps_ticketno=" + psTicketNo + " AND nps_groupcode='" + npsGroupCode + "';";
+
+                    Console.WriteLine(query2);
+                    sb.Append(query2);
+
+                    // Delete from Branch Security Lien
+                    string query3 = "DELETE FROM " + AddDoubleQuotes(branchSchema) + ".tbl_trans_security_lien WHERE ps_groupcode='" + psGroupCode + "' AND ps_ticketno=" + psTicketNo + ";";
+
+                    Console.WriteLine(query3);
+                    sb.Append(query3);
+
+                    // Delete from GLOBAL Security Lien
+                    string query4 = "DELETE FROM " + AddDoubleQuotes(globalSchema) + ".tbl_trans_security_lien WHERE ps_groupcode='" + psGroupCode + "' AND ps_ticketno=" + psTicketNo + ";";
+
+                    Console.WriteLine(query4);
+                    sb.Append(query4);
+
+                    NpgsqlCommand cmd = new NpgsqlCommand(sb.ToString(), con);
+                    cmd.CommandTimeout = 0;
+                    cmd.ExecuteNonQuery();
+
+                    message = "Success";
+                }
+            }
+            catch (Exception ex)
+            {
+                message = ex.Message;
+            }
+
+            return message;
+        }
+
+         public List<suretynotshwingdto> Getsuretyname(string branchSchema, string globalSchema, string branchCode, string groupCode, long ticketNo, string connectionString)
+        {
+            List<suretynotshwingdto> list = new List<suretynotshwingdto>();
+
+            try
+            {
+                using (NpgsqlConnection con = new NpgsqlConnection(connectionString))
+                {
+                    con.Open();
+
+                    string qry = "SELECT c.subscriber_name FROM " + AddDoubleQuotes(globalSchema) + ".tbl_mst_branch_configuration a INNER JOIN " + AddDoubleQuotes(branchSchema) + ".tbl_mst_chitgroup b ON b.branch_id=a.tbl_mst_branch_configuration_id INNER JOIN " + AddDoubleQuotes(branchSchema) + ".tbl_mst_subscriber c ON c.branch_id=a.tbl_mst_branch_configuration_id AND c.chitgroup_id=b.tbl_mst_chitgroup_id INNER JOIN " + AddDoubleQuotes(branchSchema) + ".tbl_trans_reauction_entry d ON d.chitgroup_id=b.tbl_mst_chitgroup_id AND d.branch_id=a.tbl_mst_branch_configuration_id AND d.from_ticketno=c.ticketno WHERE a.branch_code = '" + branchCode + "' AND b.groupcode = '" + groupCode + "' AND c.ticketno = " + ticketNo + ";";
+
+
+
+
+                    using (NpgsqlCommand cmd = new NpgsqlCommand(qry, con))
+                    {
+
+
+                        using (NpgsqlDataReader dr = cmd.ExecuteReader())
+                        {
+                            while (dr.Read())
+                            {
+                                list.Add(new suretynotshwingdto
+                                {
+                                    subscriber_name = dr["subscriber_name"].ToString(),
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return list;
+        }
+        public List<suretynotshwingdto> Getsuretynamedetails(string globalSchema, string groupCode, long ticketNo, string connectionString)
+        {
+            List<suretynotshwingdto> list = new List<suretynotshwingdto>();
+
+            try
+            {
+                using (NpgsqlConnection con = new NpgsqlConnection(connectionString))
+                {
+                    con.Open();
+
+                    string qry = "SELECT DISTINCT a.tbl_trans_mvo_surety_id FROM " + AddDoubleQuotes(globalSchema) + ".tbl_trans_mvo_surety a INNER JOIN " + AddDoubleQuotes(globalSchema) + ".tbl_trans_mvo_surety_details b ON b.tbl_trans_mvo_surety_id=a.tbl_trans_mvo_surety_id WHERE a.groupcode='" + groupCode + "' AND a.ticketno=" + ticketNo + ";";
+
+
+
+
+                    using (NpgsqlCommand cmd = new NpgsqlCommand(qry, con))
+                    {
+
+
+                        using (NpgsqlDataReader dr = cmd.ExecuteReader())
+                        {
+                            while (dr.Read())
+                            {
+                                list.Add(new suretynotshwingdto
+                                {
+                                    tbl_trans_mvo_surety_id = Convert.ToInt64(dr["tbl_trans_mvo_surety_id"])
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return list;
+        }
+
+
+         public string DeleteMvoSvoSuretyDetails(string branchSchema, string globalSchema, string groupCode, long ticketNo, long mvoSuretyId, long chitGroupId, string Conn)
+        {
+            string message = "";
+
+            try
+            {
+                using (NpgsqlConnection con = new NpgsqlConnection(Conn))
+                {
+                    con.Open();
+
+                    StringBuilder sb = new StringBuilder();
+
+                    // Delete from GLOBAL MVO Surety
+                   
+
+                    // Delete from GLOBAL MVO Surety Details
+                    string query1 = "DELETE FROM " + AddDoubleQuotes(globalSchema) + ".tbl_trans_mvo_surety_details WHERE tbl_trans_mvo_surety_id=" + mvoSuretyId + ";";
+                    Console.WriteLine(query1);
+                    sb.Append(query1);
+
+                    // Delete from GLOBAL SVO Surety Details
+                    string query2 = "DELETE FROM " + AddDoubleQuotes(globalSchema) + ".tbl_trans_svo_surety_details WHERE groupcode='" + groupCode + "' AND ticketno=" + ticketNo + ";";
+                    Console.WriteLine(query2);
+                    sb.Append(query2);
+
+                    // Delete from GLOBAL First Memo
+                    string query3 = "DELETE FROM " + AddDoubleQuotes(globalSchema) + ".tbl_mst_first_memo WHERE groupcode='" + groupCode + "' AND ticketno=" + ticketNo + ";";
+                    Console.WriteLine(query3);
+                    sb.Append(query3);
+
+                    // Delete from Branch Guarantor MVO
+                    string query4 = "DELETE FROM " + AddDoubleQuotes(branchSchema) + ".tbl_mst_guarantor_mvo WHERE chitgroup_id=" + chitGroupId + " AND ticketno=" + ticketNo + ";";
+                    Console.WriteLine(query4);
+                    sb.Append(query4);
+
+                    // Delete from Branch KGMS Outward
+                    string query5 = "DELETE FROM " + AddDoubleQuotes(branchSchema) + ".tbl_mst_kgms_outward WHERE groupcode='" + groupCode + "' AND ticketno=" + ticketNo + ";";
+                    Console.WriteLine(query5);
+                    sb.Append(query5);
+
+                    // Delete from Branch MVO Inward
+                    string query6 = "DELETE FROM " + AddDoubleQuotes(branchSchema) + ".tbl_mst_mvo_inward WHERE groupcode='" + groupCode + "' AND ticketno=" + ticketNo + ";";
+                    Console.WriteLine(query6);
+                    sb.Append(query6);
+
+                    // Delete from Branch SVO Inward
+                    string query7 = "DELETE FROM " + AddDoubleQuotes(branchSchema) + ".tbl_mst_svo_inward WHERE groupcode='" + groupCode + "' AND ticketno=" + ticketNo + ";";
+                    Console.WriteLine(query7);
+                    sb.Append(query7);
+
+                     string query8 = "DELETE FROM " + AddDoubleQuotes(globalSchema) + ".tbl_trans_mvo_surety WHERE groupcode='" + groupCode + "' AND ticketno=" + ticketNo + ";";
+                    Console.WriteLine(query8);
+                    sb.Append(query8);
+
+
+
+                    NpgsqlCommand cmd = new NpgsqlCommand(sb.ToString(), con);
+                    cmd.CommandTimeout = 0;
+                    cmd.ExecuteNonQuery();
+
+                    message = "Success";
+                }
+            }
+            catch (Exception ex)
+            {
+                message = ex.Message;
+            }
+
+            return message;
+        }
+
+
     }
 }

@@ -324,20 +324,148 @@ namespace Easychit_Infrastructure.ChangeDetails
 
     public class reactiondatedto
     {
-        public string subscriber_name{ get; set; }
-        public string receipt_number{ get; set; }
-        public string bidjv_transaction_no{ get; set; }
-        public string dividend_transaction_number{ get; set; }
-        public string reauction_date{ get; set; }
-        public string bidjv_transaction_date{ get; set; }
-        public string transaction_date{ get; set; }
-        public string dividend_date{ get; set; }
-        public Int64 from_ticketno{ get; set; }
-        public Int64 to_ticketno{ get; set; }
-        public string transaction_no{ get; set; }
-        public Int64 tbl_mst_contact_id{ get; set; }
-        public Int64 ticketno{ get; set; }
+        public string subscriber_name { get; set; }
+        public string receipt_number { get; set; }
+        public string bidjv_transaction_no { get; set; }
+        public string dividend_transaction_number { get; set; }
+        public string reauction_date { get; set; }
+        public string bidjv_transaction_date { get; set; }
+        public string transaction_date { get; set; }
+        public string dividend_date { get; set; }
+        public Int64 from_ticketno { get; set; }
+        public Int64 to_ticketno { get; set; }
+        public string transaction_no { get; set; }
+        public Int64 tbl_mst_contact_id { get; set; }
+        public Int64 ticketno { get; set; }
 
+    }
+
+
+    public class guarantornamechangedto
+    {
+        public Int64 tbl_mst_contact_id { get; set; }
+        public string contact_name { get; set; }
+        public string contact_surname { get; set; }
+        public string contact_mailing_name { get; set; }
+        public string subscriber_name { get; set; }
+        public string guarantor_name { get; set; }
+        public string guarantor_namemvo { get; set; }
+
+    }
+    public class GuarantorNameChangeSaveDto
+    {
+        public long ContactId { get; set; }
+        public long ChitgroupId { get; set; }
+        public int Ticketno { get; set; }
+        public string BranchSchema { get; set; } = string.Empty;
+        public string NewName { get; set; } = string.Empty;
+        public string NewSurname { get; set; } = string.Empty;
+        public string NewMailingName { get; set; } = string.Empty;
+    }
+
+    public class GuarantorMvoDTO
+    {
+        public long TblMstGuarantorMvoId { get; set; }
+        public long ContactId { get; set; }
+        public string GuarantorName { get; set; }
+        public string GuarantorSurname { get; set; }
+        public string GuarantorMailingName { get; set; }
+    }
+
+    public class MvoAllotmentDTO
+    {
+        public long TblTransMvoAllotmentId { get; set; }
+        public long TblMstGuarantorMvoId { get; set; }
+    }
+
+    public class MvoGuarantorDeleteRequestDTO
+    {
+        public string Branchschema { get; set; }
+        public long Chitgroupid { get; set; }
+        public int Ticketno { get; set; }
+        public List<long> ContactIds { get; set; }
+        public List<long> GuarantorMvoIds { get; set; }
+    }
+
+    public class GuarantorDTO
+    {
+        public long TblMstGuarantorId { get; set; }
+        public long ContactId { get; set; }
+        public string GuarantorName { get; set; }
+    }
+
+    public class GuarantorIncomeDTO
+    {
+        public long TblMstGuarantorIncomeId { get; set; }
+        public long GuarantorId { get; set; }
+    }
+
+    public class BpoGuarantorDeleteRequestDTO
+    {
+        public string Branchschema { get; set; }
+        public long Chitgroupid { get; set; }
+        public int Ticketno { get; set; }
+        public List<long> ContactIds { get; set; }
+        public List<long> GuarantorIds { get; set; }
+    }
+
+
+    public class GuarantorDTO1
+    {
+        public long GuarantorId { get; set; }
+        public long contact_id { get; set; }
+        public string GuarantorName { get; set; }
+        public string v_reference_id { get; set; }
+
+    }
+    public class bpoGuarantorDTO
+    {
+        public long GuarantorId { get; set; }
+        public string GuarantorName { get; set; }
+        public Int64 contact_id { get; set; }
+
+    }
+
+    public class finalsettlement
+    {
+        public string surety_name { get; set; }
+
+        public List<FirstMemoDTO> FirstMemo { get; set; } = new List<FirstMemoDTO>();
+
+        public List<FinalMemoDTO> FinalMemo { get; set; } = new List<FinalMemoDTO>();
+    }
+
+    public class FirstMemoDTO
+    {
+        public long? authorized_by { get; set; }
+        public long? approved_by { get; set; }
+        public DateTime? authorized_date { get; set; }
+        public DateTime? approved_date { get; set; }
+        public string file_name { get; set; }
+        public string approved_file_name { get; set; }
+    }
+
+    public class FinalMemoDTO
+    {
+        public long? authorized_by { get; set; }
+        public long? approved_by { get; set; }
+        public DateTime? authorized_date { get; set; }
+        public DateTime? approved_date { get; set; }
+        public string file_name { get; set; }
+        public string approved_file_name { get; set; }
+    }
+
+
+    public class chitcanceldto
+    {
+        public string NPS_GROUPCODE { get; set; }
+    }
+
+
+     public class suretynotshwingdto
+    {
+        public string subscriber_name { get; set; }
+        public Int64 tbl_trans_mvo_surety_id { get; set; }
     }
 
 }

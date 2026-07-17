@@ -154,53 +154,111 @@ string panNumber, string globalschema);
             string documentIds,
             string globalschema);
 
-            List<PaymentAdjustmentDTO> GetPaymentAdjustmentDetails(
-    string connectionString,
-    string branchschema,
-    string globalschema,
-    string groupcode,
-    int ticketno);
+        List<PaymentAdjustmentDTO> GetPaymentAdjustmentDetails(
+string connectionString,
+string branchschema,
+string globalschema,
+string groupcode,
+int ticketno);
 
-    List<PaymentAdjustmentDTO> GetSubscriberDetails(
-    string connectionString,
-    string branchschema,
-    string globalschema,
-    string groupcode,
-    int ticketno);
-
-    string UpdateAdjustmentDetails(
-    string connectionString,
-    string branchschema,
-    long adjustmentChitGroupId,
-    long adjustmentTicketNo,
-    long adjustmentContactId,
-    string bpoChequeInformationIds,
-    string bpoChequeInformationDetailIds,
-    decimal adjustmentAmount,
-    string chitPaymentAdjustmentIds);
-
-    string InsertSubscriberIncome(
-    string connectionString,
-    string branchschema,
-    long subscriberId,
-    int branch_id);
-
-    List<reactiondatedto> GetreauctionSubscriberDetails(
+        List<PaymentAdjustmentDTO> GetSubscriberDetails(
         string connectionString,
         string branchschema,
         string globalschema,
         string groupcode,
-        int ticketno,string branch_code);
+        int ticketno);
+
+        string UpdateAdjustmentDetails(
+        string connectionString,
+        string branchschema,
+        long adjustmentChitGroupId,
+        long adjustmentTicketNo,
+        long adjustmentContactId,
+        string bpoChequeInformationIds,
+        string bpoChequeInformationDetailIds,
+        decimal adjustmentAmount,
+        string chitPaymentAdjustmentIds);
+
+        string InsertSubscriberIncome(
+        string connectionString,
+        string branchschema,
+        long subscriberId,
+        int branch_id);
+
+        List<reactiondatedto> GetreauctionSubscriberDetails(
+            string connectionString,
+            string branchschema,
+            string globalschema,
+            string groupcode,
+            int ticketno, string branch_code);
 
 
         List<reactiondatedto> GetreauctionDetails(
         string connectionString,
         string branchschema,
-        int from_ticketno,int to_ticketno);
+        int from_ticketno, int to_ticketno);
 
         List<reactiondatedto> Getreauctiondivdenddetails(
         string connectionString,
-        string branchschema,string transaction_no);
+        string branchschema, string transaction_no);
+
+        List<guarantornamechangedto> GetnamechangeDetails(
+        string connectionString, string branchschema, string globalschema, string groupcode,
+        int ticketno, string branch_code);
+
+        // bool SaveGuarantorNameChange(string connectionString, string branchschema, GuarantorNameChangeSaveDto dto);
+
+        string UpdateSubscriberGuarantorName(string branchschema, string globalschema, long chitgroupid, long ticketno, long contactid, string contactname, string contactmailingname, string Conn, string contactsurname);
+
+
+        string UpdateReauctionTransactionDates(string branchschema, long chitgroupid, long toticketno, long ticketno, string reauctiondate, string oldtransactiondate, string createddate, string subscriberjvno, string dividendtransactionnos, string bidjvtransactionnos, string Conn);
+
+
+        // List<GuarantorMvoDTO> GetGuarantorMvoDetails(string globalschema, string schema, string Conn, long chitgroupid, int ticketNo);
+
+        // List<MvoAllotmentDTO> GetMvoAllotmentDetails(string schema, string Conn, List<long> guarantorMvoIds);
+
+        // bool DeleteMvoGuarantorRecords(string schema, string Conn, MvoGuarantorDeleteRequestDTO request);
+        // List<GuarantorDTO> GetGuarantorDetails(string schema, string Conn, long chitgroupid, int ticketNo);
+
+        // List<GuarantorIncomeDTO> GetGuarantorIncomeDetails(string schema, string Conn, List<long> guarantorIds);
+
+        // bool DeleteBpoGuarantorRecords(string schema, string Conn, BpoGuarantorDeleteRequestDTO request);
+
+
+        
+        List<GuarantorDTO1> GetGuarantormvoDetails(string branchSchema, string globalSchema, string branchCode, string groupCode, long ticketNo, string connectionString);
+
+        List<GuarantorDTO1> GetMVOReferenceIds(string branchSchema, long guarantorIds, string connectionString);
+
+        string DeleteGuarantorDetails(string branchSchema, long chitGroupId, long ticketNo, string contactIds, string guarantorMVOIds, string connectionString);
+
+
+         List<bpoGuarantorDTO> GetGuarantorbpoDetails(string branchSchema, string globalSchema, string branchCode, string groupCode, long ticketNo, string connectionString);
+
+        string DeletepdoGuarantorDetails(string branchSchema, long chitGroupId, long ticketNo, string contactIds, string guarantorMVOIds, string connectionString);
+
+        
+        List<finalsettlement> Getfinalsetlement(string branchSchema, string globalSchema, string groupCode, long ticketNo, string connectionString);
+
+        // List<finalsettlement> Getfinalsetlementdetails(string surety_name, string globalSchema, string groupCode, long ticketNo, string connectionString);
+
+        List<finalsettlement> Getfinalsetlementdetails(string surety_name, string globalSchema, string groupCode, long ticketNo, string connectionString);
+
+
+        string DeleteFinalMemoDetails(string branchSchema, string globalSchema, long chitGroupId, long ticketNo, string groupCode, string Conn);
+
+        List<chitcanceldto> Getchitpledgecancel(string branchSchema, string globalSchema, string groupCode, long ticketNo, string connectionString);
+
+        string DeleteChitPledgeAndSecurityLienDetails(string branchSchema, string globalSchema, string psGroupCode, long psTicketNo, string npsGroupCode, string Conn);
+
+
+
+        List<suretynotshwingdto> Getsuretyname(string branchSchema, string globalSchema, string branchCode, string groupCode, long ticketNo, string connectionString);
+
+        List<suretynotshwingdto> Getsuretynamedetails(string globalSchema, string groupCode, long ticketNo, string connectionString);
+
+         string DeleteMvoSvoSuretyDetails(string branchSchema, string globalSchema, string groupCode, long ticketNo, long mvoSuretyId, long chitGroupId, string Conn);
 
     }
 }

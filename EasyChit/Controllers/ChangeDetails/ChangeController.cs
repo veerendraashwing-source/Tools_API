@@ -1221,7 +1221,7 @@ namespace Easychit_Api.Controllers.ChangeDetails
                 });
             }
         }
-        
+
         [HttpPost("InsertSubscriberIncome")]
         public IActionResult InsertSubscriberIncome(string branchschema, long subscriberId, int branch_id)
         {
@@ -1250,7 +1250,7 @@ namespace Easychit_Api.Controllers.ChangeDetails
                     branchschema,
                     GlobalSchema,
                     groupcode,
-                    ticketno,branch_code);
+                    ticketno, branch_code);
 
                 return Ok(result);
             }
@@ -1294,7 +1294,7 @@ namespace Easychit_Api.Controllers.ChangeDetails
             {
                 var result = _easychittools.Getreauctiondivdenddetails(
                     Con,
-                    branchschema,transaction_no);
+                    branchschema, transaction_no);
 
                 return Ok(result);
             }
@@ -1304,6 +1304,323 @@ namespace Easychit_Api.Controllers.ChangeDetails
             }
         }
 
+
+        [HttpPost]
+        [Route("UpdateReauctionTransactionDates")]
+        public IActionResult UpdateReauctionTransactionDates(string branchschema, long chitgroupid, long toticketno, long ticketno, string reauctiondate, string oldtransactiondate, string createddate, string subscriberjvno, string dividendtransactionnos, string bidjvtransactionnos)
+        {
+            try
+            {
+                string result = _easychittools.UpdateReauctionTransactionDates(branchschema, chitgroupid, toticketno, ticketno, reauctiondate, oldtransactiondate, createddate, subscriberjvno, dividendtransactionnos, bidjvtransactionnos, Con);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+        [HttpGet]
+        [Route("GetnamechangeDetails")]
+
+        public IActionResult GetnamechangeDetails(
+        string branchschema,
+        string groupcode,
+        int ticketno, string branch_code)
+        {
+            try
+            {
+                var result = _easychittools.GetnamechangeDetails(
+                    Con,
+                    branchschema, GlobalSchema, groupcode, ticketno, branch_code);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost]
+        [Route("UpdateSubscriberGuarantorName")]
+        public IActionResult UpdateSubscriberGuarantorName(string branchschema, long chitgroupid, long ticketno, long contactid, string contactname, string contactmailingname, string contactsurname)
+        {
+            try
+            {
+                string result = _easychittools.UpdateSubscriberGuarantorName(branchschema, GlobalSchema, chitgroupid, ticketno, contactid, contactname, contactmailingname, Con, contactsurname);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+        [HttpGet]
+        [Route("GetGuarantormvoDetails")]
+        public IActionResult GetGuarantormvoDetails(string BranchSchema, string BranchCode, string GroupCode, long TicketNo)
+        {
+            try
+            {
+
+                var result = _easychittools.GetGuarantormvoDetails(BranchSchema, GlobalSchema, BranchCode, GroupCode, TicketNo, Con);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet]
+        [Route("GetMVOReferenceIds")]
+        public IActionResult GetMVOReferenceIds(long GuarantorIds, string branchSchema)
+        {
+            try
+            {
+
+                var result = _easychittools.GetMVOReferenceIds(
+                                branchSchema,
+                                GuarantorIds,
+                                Con);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+        [HttpPost]
+        [Route("DeleteGuarantorDetails")]
+        public IActionResult DeleteGuarantorDetails(string branchSchema, long chitGroupId, long ticketNo, string contactIds, string guarantorMVOIds)
+        {
+            try
+            {
+
+                string result = _easychittools.DeleteGuarantorDetails(branchSchema, chitGroupId, ticketNo, contactIds, guarantorMVOIds, Con);
+
+                // return Ok(result);
+
+                return Ok(new
+                {
+                    message = "Deleted Successfully"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+        [HttpGet]
+        [Route("GetGuarantorbpoDetails")]
+        public IActionResult GetGuarantorbpoDetails(string BranchSchema, string BranchCode, string GroupCode, long TicketNo)
+        {
+            try
+            {
+
+                var result = _easychittools.GetGuarantorbpoDetails(BranchSchema, GlobalSchema, BranchCode, GroupCode, TicketNo, Con);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost]
+        [Route("DeletepdoGuarantorDetails")]
+        public IActionResult DeletepdoGuarantorDetails(string branchSchema, long chitGroupId, long ticketNo, string contactIds, string guarantorMVOIds)
+        {
+            try
+            {
+
+                string result = _easychittools.DeletepdoGuarantorDetails(branchSchema, chitGroupId, ticketNo, contactIds, guarantorMVOIds, Con);
+
+                // return Ok(result);
+                return Ok(new
+                {
+                    message = "Deleted Successfully"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet]
+        [Route("Getfinalsetlement")]
+        public IActionResult Getfinalsetlement(string BranchSchema, string GroupCode, long TicketNo)
+        {
+            try
+            {
+
+                var result = _easychittools.Getfinalsetlement(BranchSchema, GlobalSchema, GroupCode, TicketNo, Con);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+
+
+        [HttpGet]
+        [Route("Getfinalsetlementdetails")]
+        public List<finalsettlement> Getfinalsetlementdetails(string surety_name, string groupCode, long ticketNo)
+        {
+            try
+            {
+                var result = _easychittools.Getfinalsetlementdetails(surety_name, GlobalSchema, groupCode, ticketNo, Con);
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error retrieving final settlement details: {ex.Message}");
+            }
+        }
+
+
+        [HttpPost]
+        [Route("DeleteFinalMemoDetails")]
+        public IActionResult DeleteFinalMemoDetails(string branchSchema, long chitGroupId, long ticketNo, string groupCode)
+        {
+            try
+            {
+                string result = _easychittools.DeleteFinalMemoDetails(
+                    branchSchema,
+                    GlobalSchema,
+                    chitGroupId,
+                    ticketNo,
+                    groupCode,
+                    Con);
+
+                // return Ok(result);
+                return Ok(new
+                {
+                    message = "Deleted Successfully"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet]
+        [Route("Getchitpledgecancel")]
+        public IActionResult Getchitpledgecancel(string BranchSchema, string GroupCode, long TicketNo)
+        {
+            try
+            {
+
+                var result = _easychittools.Getchitpledgecancel(BranchSchema, GlobalSchema, GroupCode, TicketNo, Con);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+        [HttpPost]
+        [Route("DeleteChitPledgeAndSecurityLienDetails")]
+        public IActionResult DeleteChitPledgeAndSecurityLienDetails(string branchSchema, string psGroupCode, long psTicketNo, string npsGroupCode)
+        {
+            try
+            {
+                string result = _easychittools.DeleteChitPledgeAndSecurityLienDetails(
+                    branchSchema,
+                    GlobalSchema,
+                    psGroupCode,
+                    psTicketNo,
+                    npsGroupCode,
+                    Con
+                );
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet]
+        [Route("Getsuretyname")]
+        public IActionResult Getsuretyname(string BranchSchema, string BranchCode, string GroupCode, long TicketNo)
+        {
+            try
+            {
+
+                var result = _easychittools.Getsuretyname(BranchSchema, GlobalSchema, BranchCode, GroupCode, TicketNo, Con);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet]
+        [Route("Getsuretynamedetails")]
+        public IActionResult Getsuretynamedetails(string GroupCode, long TicketNo)
+        {
+            try
+            {
+
+                var result = _easychittools.Getsuretynamedetails(GlobalSchema, GroupCode, TicketNo, Con);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+         [HttpPost]
+        [Route("DeleteMvoSvoSuretyDetails")]
+        public IActionResult DeleteMvoSvoSuretyDetails(string branchSchema, string groupCode, long ticketNo, long mvoSuretyId, long chitGroupId)
+        {
+            try
+            {
+                string result = _easychittools.DeleteMvoSvoSuretyDetails(branchSchema, GlobalSchema, groupCode, ticketNo, mvoSuretyId, chitGroupId, Con);
+
+                if (result == "Success")
+                {
+                    return Ok(result);
+                }
+                else
+                {
+                    return BadRequest(result);
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
 
     }
