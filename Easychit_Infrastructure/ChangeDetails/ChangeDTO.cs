@@ -476,4 +476,29 @@ namespace Easychit_Infrastructure.ChangeDetails
         public string svofilledverfieddocument { get; set; }
     }
 
+
+     public class centralofficechitsdto
+    {
+        public string contact_mailing_name { get; set; }
+        public string subscriber_name { get; set; }
+        public string bank_branch_name { get; set; }
+        public string chit_receipt_number { get; set; }
+        public DateTime chit_receipt_date { get; set; }
+        public string bank_account_number { get; set; }
+        public Int64 contact_id { get; set; }
+    }
+
+    public class UpdateAdvanceInterestBankDTO
+    {
+        public long ContactId { get; set; }
+        public long ChitGroupId { get; set; }
+        public long TicketNo { get; set; }
+        public DateTime AdjustmentDate { get; set; }
+        public long BranchId { get; set; }
+        public long AdjustedBranchId { get; set; }
+        public long AdjustedChitGroupId { get; set; }
+        public long AdjustedTicketNo { get; set; }
+        // public long UserId { get; set; }
+    }
+
 }
