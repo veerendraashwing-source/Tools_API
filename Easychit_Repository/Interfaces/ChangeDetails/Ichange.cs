@@ -266,5 +266,12 @@ int ticketno);
 
         string DeleteKgmsMvoSvoDetails(string branchSchema, string globalSchema, string groupCode, long ticketNo, bool fileDownloadStatus, string Conn);
 
+         List<centralofficechitsdto> Getcentralofficechitsdetails( string connectionString, string branchschema, string globalschema, string groupcode, Int64 ticketno, string branch_code);
+
+
+        List<BranchNamesDTO> GetcoBranchNames(string globalschema, string Conn);
+
+        string UpdateAdvanceInterestPaymentBank(string branchSchema, UpdateAdvanceInterestBankDTO obj, string Conn);
+
     }
 }

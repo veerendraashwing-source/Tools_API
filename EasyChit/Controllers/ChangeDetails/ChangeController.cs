@@ -1669,6 +1669,62 @@ namespace Easychit_Api.Controllers.ChangeDetails
             }
         }
 
+         [HttpGet]
+        [Route("Getcentralofficechitsdetails")]
+        public IActionResult Getcentralofficechitsdetails(string BranchSchema, string BranchCode, string GroupCode, long TicketNo)
+        {
+            try
+            {
+
+                var result = _easychittools.Getcentralofficechitsdetails(Con, BranchSchema, GlobalSchema, GroupCode, TicketNo, BranchCode);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+        [HttpGet]
+        [Route("GetcoBranchNames")]
+        public IActionResult GetcoBranchNames()
+        {
+            List<BranchNamesDTO> branchList = new List<BranchNamesDTO>();
+            try
+            {
+
+
+                var result = _easychittools.GetcoBranchNames(GlobalSchema, Con);
+
+
+
+                return Ok(result);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        [HttpPost]
+        [Route("UpdateAdvanceInterestPaymentBank")]
+        public IActionResult UpdateAdvanceInterestPaymentBank(UpdateAdvanceInterestBankDTO obj,string BranchSchema)
+        {
+            try
+            {
+
+                string result = _easychittools.UpdateAdvanceInterestPaymentBank(BranchSchema, obj, Con);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
 
     }
 }
