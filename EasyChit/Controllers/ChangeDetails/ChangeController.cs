@@ -1598,7 +1598,7 @@ namespace Easychit_Api.Controllers.ChangeDetails
         }
 
 
-         [HttpPost]
+        [HttpPost]
         [Route("DeleteMvoSvoSuretyDetails")]
         public IActionResult DeleteMvoSvoSuretyDetails(string branchSchema, string groupCode, long ticketNo, long mvoSuretyId, long chitGroupId)
         {
@@ -1622,7 +1622,7 @@ namespace Easychit_Api.Controllers.ChangeDetails
         }
 
 
-         [HttpGet]
+        [HttpGet]
         [Route("GetRECEIVEDDOCUMENT")]
         public IActionResult GetRECEIVEDDOCUMENT(string BranchSchema, string GroupCode, long TicketNo)
         {
@@ -1669,7 +1669,7 @@ namespace Easychit_Api.Controllers.ChangeDetails
             }
         }
 
-         [HttpGet]
+        [HttpGet]
         [Route("Getcentralofficechitsdetails")]
         public IActionResult Getcentralofficechitsdetails(string BranchSchema, string BranchCode, string GroupCode, long TicketNo)
         {
@@ -1708,23 +1708,42 @@ namespace Easychit_Api.Controllers.ChangeDetails
             }
         }
 
+
+
         [HttpPost]
         [Route("UpdateAdvanceInterestPaymentBank")]
-        public IActionResult UpdateAdvanceInterestPaymentBank(UpdateAdvanceInterestBankDTO obj,string BranchSchema)
+        public IActionResult UpdateAdvanceInterestPaymentBank(string branchSchema,UpdateAdvanceInterestBankDTO obj)
         {
             try
             {
 
-                string result = _easychittools.UpdateAdvanceInterestPaymentBank(BranchSchema, obj, Con);
+                string result = _easychittools.UpdateAdvanceInterestPaymentBank(branchSchema, obj, Con);
 
-                return Ok(result);
+                if (result == "Success")
+                {
+                    return Ok(new
+                    {
+                        Status = true,
+                        Message = "Advance Interest details updated successfully."
+                    });
+                }
+                else
+                {
+                    return BadRequest(new
+                    {
+                        Status = false,
+                        Message = result
+                    });
+                }
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new
+                {
+                    Status = false,
+                    Message = ex.Message
+                });
             }
         }
-
-
     }
 }

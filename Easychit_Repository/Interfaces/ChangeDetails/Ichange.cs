@@ -226,7 +226,7 @@ int ticketno);
         // bool DeleteBpoGuarantorRecords(string schema, string Conn, BpoGuarantorDeleteRequestDTO request);
 
 
-        
+
         List<GuarantorDTO1> GetGuarantormvoDetails(string branchSchema, string globalSchema, string branchCode, string groupCode, long ticketNo, string connectionString);
 
         List<GuarantorDTO1> GetMVOReferenceIds(string branchSchema, long guarantorIds, string connectionString);
@@ -234,11 +234,11 @@ int ticketno);
         string DeleteGuarantorDetails(string branchSchema, long chitGroupId, long ticketNo, string contactIds, string guarantorMVOIds, string connectionString);
 
 
-         List<bpoGuarantorDTO> GetGuarantorbpoDetails(string branchSchema, string globalSchema, string branchCode, string groupCode, long ticketNo, string connectionString);
+        List<bpoGuarantorDTO> GetGuarantorbpoDetails(string branchSchema, string globalSchema, string branchCode, string groupCode, long ticketNo, string connectionString);
 
         string DeletepdoGuarantorDetails(string branchSchema, long chitGroupId, long ticketNo, string contactIds, string guarantorMVOIds, string connectionString);
 
-        
+
         List<finalsettlement> Getfinalsetlement(string branchSchema, string globalSchema, string groupCode, long ticketNo, string connectionString);
 
         // List<finalsettlement> Getfinalsetlementdetails(string surety_name, string globalSchema, string groupCode, long ticketNo, string connectionString);
@@ -258,15 +258,15 @@ int ticketno);
 
         List<suretynotshwingdto> Getsuretynamedetails(string globalSchema, string groupCode, long ticketNo, string connectionString);
 
-         string DeleteMvoSvoSuretyDetails(string branchSchema, string globalSchema, string groupCode, long ticketNo, long mvoSuretyId, long chitGroupId, string Conn);
+        string DeleteMvoSvoSuretyDetails(string branchSchema, string globalSchema, string groupCode, long ticketNo, long mvoSuretyId, long chitGroupId, string Conn);
 
 
-         List<RECEIVEDDOCUMENTDTO> GetRECEIVEDDOCUMENT(string branchSchema,string globalSchema, string connectionString, string groupCode, Int64 ticketNo);
+        List<RECEIVEDDOCUMENTDTO> GetRECEIVEDDOCUMENT(string branchSchema, string globalSchema, string connectionString, string groupCode, Int64 ticketNo);
 
 
         string DeleteKgmsMvoSvoDetails(string branchSchema, string globalSchema, string groupCode, long ticketNo, bool fileDownloadStatus, string Conn);
 
-         List<centralofficechitsdto> Getcentralofficechitsdetails( string connectionString, string branchschema, string globalschema, string groupcode, Int64 ticketno, string branch_code);
+        List<centralofficechitsdto> Getcentralofficechitsdetails(string connectionString, string branchschema, string globalschema, string groupcode, Int64 ticketno, string branch_code);
 
 
         List<BranchNamesDTO> GetcoBranchNames(string globalschema, string Conn);

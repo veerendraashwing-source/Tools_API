@@ -3739,7 +3739,7 @@ string panNumber, string globalschema)
             return message;
         }
 
-         public List<centralofficechitsdto> Getcentralofficechitsdetails(string connectionString, string branchschema, string globalschema, string groupcode, Int64 ticketno, string branch_code)
+        public List<centralofficechitsdto> Getcentralofficechitsdetails(string connectionString, string branchschema, string globalschema, string groupcode, Int64 ticketno, string branch_code)
         {
 
             List<centralofficechitsdto> lst = new List<centralofficechitsdto>();
@@ -3751,7 +3751,7 @@ string panNumber, string globalschema)
 
                     con.Open();
 
-                    string qry = "SELECT d.contact_mailing_name,c.contact_id, c.subscriber_name, e.bank_branch_name, f.chit_receipt_number, f.chit_receipt_date, g.bank_account_number FROM " + AddDoubleQuotes(globalschema) + ".tbl_mst_branch_configuration a INNER JOIN " + AddDoubleQuotes(branchschema) + ".tbl_mst_chitgroup b ON b.branch_id = a.tbl_mst_branch_configuration_id INNER JOIN " + AddDoubleQuotes(branchschema) + ".tbl_mst_subscriber c ON c.branch_id = a.tbl_mst_branch_configuration_id AND c.chitgroup_id = b.tbl_mst_chitgroup_id INNER JOIN " + AddDoubleQuotes(globalschema) + ".tbl_mst_contact d ON d.tbl_mst_contact_id = c.contact_id INNER JOIN " + AddDoubleQuotes(globalschema) + ".tbl_mst_contact_bank e ON e.contact_id = c.contact_id INNER JOIN " + AddDoubleQuotes(branchschema) + ".tbl_trans_chit_advance f ON f.branch_id = a.tbl_mst_branch_configuration_id AND f.chitgroup_id = b.tbl_mst_chitgroup_id AND f.ticketno = c.ticketno AND f.contact_id = d.tbl_mst_contact_id LEFT JOIN " + AddDoubleQuotes(branchschema) + ".tbl_trans_chit_advance_interest_payment_bank g ON g.branch_id = a.tbl_mst_branch_configuration_id AND g.chitgroup_id = b.tbl_mst_chitgroup_id AND g.ticketno = c.ticketno AND g.contact_id = d.tbl_mst_contact_id LEFT JOIN " + AddDoubleQuotes(branchschema) + ".tbl_trans_chit_advance_interest_adjustments h ON h.branch_id = a.tbl_mst_branch_configuration_id AND h.chitgroup_id = b.tbl_mst_chitgroup_id AND h.ticketno = c.ticketno AND h.contact_id = d.tbl_mst_contact_id WHERE a.branch_code='" + branch_code + "' and b.groupcode='" + groupcode + "' and c.ticketno=" + ticketno + " AND e.isprimary = 'true' AND e.status = 'true';";
+                    string qry = "SELECT d.contact_mailing_name,c.contact_id, c.subscriber_name, e.bank_branch_name, f.chit_receipt_number, f.chit_receipt_date, g.bank_account_number,e.bank_id,e.bank_ifsc_code FROM " + AddDoubleQuotes(globalschema) + ".tbl_mst_branch_configuration a INNER JOIN " + AddDoubleQuotes(branchschema) + ".tbl_mst_chitgroup b ON b.branch_id = a.tbl_mst_branch_configuration_id INNER JOIN " + AddDoubleQuotes(branchschema) + ".tbl_mst_subscriber c ON c.branch_id = a.tbl_mst_branch_configuration_id AND c.chitgroup_id = b.tbl_mst_chitgroup_id INNER JOIN " + AddDoubleQuotes(globalschema) + ".tbl_mst_contact d ON d.tbl_mst_contact_id = c.contact_id INNER JOIN " + AddDoubleQuotes(globalschema) + ".tbl_mst_contact_bank e ON e.contact_id = c.contact_id INNER JOIN " + AddDoubleQuotes(branchschema) + ".tbl_trans_chit_advance f ON f.branch_id = a.tbl_mst_branch_configuration_id AND f.chitgroup_id = b.tbl_mst_chitgroup_id AND f.ticketno = c.ticketno AND f.contact_id = d.tbl_mst_contact_id LEFT JOIN " + AddDoubleQuotes(branchschema) + ".tbl_trans_chit_advance_interest_payment_bank g ON g.branch_id = a.tbl_mst_branch_configuration_id AND g.chitgroup_id = b.tbl_mst_chitgroup_id AND g.ticketno = c.ticketno AND g.contact_id = d.tbl_mst_contact_id LEFT JOIN " + AddDoubleQuotes(branchschema) + ".tbl_trans_chit_advance_interest_adjustments h ON h.branch_id = a.tbl_mst_branch_configuration_id AND h.chitgroup_id = b.tbl_mst_chitgroup_id AND h.ticketno = c.ticketno AND h.contact_id = d.tbl_mst_contact_id WHERE a.branch_code='" + branch_code + "' and b.groupcode='" + groupcode + "' and c.ticketno=" + ticketno + " AND e.isprimary = 'true' AND e.status = 'true';";
 
 
                     Console.WriteLine(qry);
@@ -3767,11 +3767,13 @@ string panNumber, string globalschema)
 
                                 obj.subscriber_name = dr["subscriber_name"].ToString();
                                 obj.bank_branch_name = dr["bank_branch_name"].ToString();
+                                obj.bank_ifsc_code = dr["bank_ifsc_code"].ToString();
                                 obj.chit_receipt_number = dr["chit_receipt_number"].ToString();
                                 obj.chit_receipt_date = Convert.ToDateTime(dr["chit_receipt_date"]);
                                 obj.bank_account_number = dr["bank_account_number"].ToString();
                                 obj.contact_mailing_name = dr["contact_mailing_name"].ToString();
                                 obj.contact_id = Convert.ToInt64(dr["contact_id"]);
+                                obj.bank_id = Convert.ToInt64(dr["bank_id"]);
 
                                 lst.Add(obj);
                             }
@@ -3796,7 +3798,7 @@ string panNumber, string globalschema)
 
             try
             {
-                Query = "SELECT DISTINCT branch_name, tbl_mst_branch_configuration_id, branch_code, branch_type, company_configuration_id FROM " + AddDoubleQuotes(globalschema) + ".tbl_mst_branch_configuration WHERE UNIQUE_branch_name LIKE '%CA-CO%' AND branch_type = 'CAO';";
+                Query = "SELECT DISTINCT branch_name, tbl_mst_branch_configuration_id, branch_code, branch_type, company_configuration_id FROM " + AddDoubleQuotes(globalschema) + ".tbl_mst_branch_configuration WHERE UNIQUE_branch_name LIKE '%CA-CO%' OR branch_name LIKE '%CAO%' AND branch_type = 'CAO';";
 
 
                 using (NpgsqlDataReader dr = NPGSqlHelper.ExecuteReader(Conn, CommandType.Text, Query))
@@ -3839,13 +3841,47 @@ string panNumber, string globalschema)
 
                     StringBuilder sb = new StringBuilder();
 
-                    string query1 = "UPDATE " + AddDoubleQuotes(branchSchema) + ".tbl_trans_chit_advance_interest_payment_bank SET isprimary='false', status='false' WHERE contact_id=" + obj.ContactId + " AND chitgroup_id=" + obj.ChitGroupId + " AND ticketno=" + obj.TicketNo + ";";
-                    Console.WriteLine(query1);
-                    sb.Append(query1);
+                    //===========================================
+                    //1. CHIT ADVANCE INTEREST SELF TO ADJUSTMENT
+                    //===========================================
+                    if (obj.ActionType == 1)
+                    {
+                        string query1 = "UPDATE " + AddDoubleQuotes(branchSchema) + ".tbl_trans_chit_advance_interest_payment_bank SET isprimary='false',status='false' WHERE contact_id=" + obj.ContactId + " AND chitgroup_id=" + obj.ChitGroupId + " AND ticketno=" + obj.TicketNo + ";";
+                        Console.WriteLine(query1);
+                        sb.Append(query1);
 
-                    string query2 = "INSERT INTO " + AddDoubleQuotes(branchSchema) + ".tbl_trans_chit_advance_interest_adjustments (adjustment_date, branch_id, chitgroup_id, ticketno, contact_id, adjusted_branch_id, adjusted_chitgroup_id, adjusted_ticketno, adjusted_contact_id, user_id, status) VALUES ('" + obj.AdjustmentDate.ToString("yyyy-MM-dd") + "', " + obj.BranchId + ", " + obj.ChitGroupId + ", " + obj.TicketNo + ", " + obj.ContactId + ", " + obj.AdjustedBranchId + ", " + obj.AdjustedChitGroupId + ", " + obj.AdjustedTicketNo + ", " + obj.ContactId + ",1, 'true');";
-                    Console.WriteLine(query2);
-                    sb.Append(query2);
+                        string query2 = "INSERT INTO " + AddDoubleQuotes(branchSchema) + ".tbl_trans_chit_advance_interest_adjustments(adjustment_date,branch_id,chitgroup_id,ticketno,contact_id,adjusted_branch_id,adjusted_chitgroup_id,adjusted_ticketno,adjusted_contact_id,user_id,status) VALUES('" + obj.AdjustmentDate.ToString("yyyy-MM-dd") + "'," + obj.BranchId + "," + obj.ChitGroupId + "," + obj.TicketNo + "," + obj.ContactId + "," + obj.AdjustedBranchId + "," + obj.AdjustedChitGroupId + "," + obj.AdjustedTicketNo + "," + obj.ContactId + ",1,'true');";
+                        Console.WriteLine(query2);
+                        sb.Append(query2);
+                    }
+
+                    //===========================================
+                    //2. CHIT ADVANCE INTEREST ADJUSTMENT TO SELF
+                    //===========================================
+                    else if (obj.ActionType == 2)
+                    {
+                        string query1 = "INSERT INTO " + AddDoubleQuotes(branchSchema) + ".tbl_trans_chit_advance_interest_payment_bank(branch_id,chitgroup_id,ticketno,contact_id,bank_id,bank_branch_name,bank_account_number,bank_ifsc_code,isprimary,status) VALUES(" + obj.BranchId + "," + obj.ChitGroupId + "," + obj.TicketNo + "," + obj.ContactId + "," + obj.BankId + ",'" + obj.BankBranchName + "','" + obj.BankAccountNumber + "','" + obj.BankIFSCCode + "','true','true');";
+                        Console.WriteLine(query1);
+                        sb.Append(query1);
+
+                        string query2 = "UPDATE " + AddDoubleQuotes(branchSchema) + ".tbl_trans_chit_advance_interest_adjustments SET status='false' WHERE contact_id=" + obj.ContactId + " AND chitgroup_id=" + obj.ChitGroupId + " AND ticketno=" + obj.TicketNo + ";";
+                        Console.WriteLine(query2);
+                        sb.Append(query2);
+                    }
+
+                    //====================================================
+                    //3. CHIT ADVANCE INTEREST ADJUSTMENT GROUPCODE CHANGE
+                    //====================================================
+                    else if (obj.ActionType == 3)
+                    {
+                        string query1 = "INSERT INTO " + AddDoubleQuotes(branchSchema) + ".tbl_trans_chit_advance_interest_adjustments(adjustment_date,branch_id,chitgroup_id,ticketno,contact_id,adjusted_branch_id,adjusted_chitgroup_id,adjusted_ticketno,adjusted_contact_id,user_id,status) VALUES('" + obj.AdjustmentDate.ToString("yyyy-MM-dd") + "'," + obj.BranchId + "," + obj.ChitGroupId + "," + obj.TicketNo + "," + obj.ContactId + "," + obj.AdjustedBranchId + "," + obj.AdjustedChitGroupId + "," + obj.AdjustedTicketNo + "," + obj.ContactId + ",1,'true');";
+                        Console.WriteLine(query1);
+                        sb.Append(query1);
+
+                        string query2 = "UPDATE " + AddDoubleQuotes(branchSchema) + ".tbl_trans_chit_advance_interest_adjustments SET status='false' WHERE contact_id=" + obj.ContactId + " AND chitgroup_id=" + obj.ChitGroupId + " AND ticketno=" + obj.TicketNo + ";";
+                        Console.WriteLine(query2);
+                        sb.Append(query2);
+                    }
 
                     NpgsqlCommand cmd = new NpgsqlCommand(sb.ToString(), con);
                     cmd.CommandTimeout = 0;
@@ -3861,7 +3897,5 @@ string panNumber, string globalschema)
 
             return message;
         }
-
-
     }
 }

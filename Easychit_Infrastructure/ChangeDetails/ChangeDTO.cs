@@ -462,14 +462,14 @@ namespace Easychit_Infrastructure.ChangeDetails
     }
 
 
-     public class suretynotshwingdto
+    public class suretynotshwingdto
     {
         public string subscriber_name { get; set; }
         public Int64 tbl_trans_mvo_surety_id { get; set; }
     }
 
 
-     public class RECEIVEDDOCUMENTDTO
+    public class RECEIVEDDOCUMENTDTO
     {
         public string subscriber_name { get; set; }
         public string filled_surety_file { get; set; }
@@ -477,15 +477,18 @@ namespace Easychit_Infrastructure.ChangeDetails
     }
 
 
-     public class centralofficechitsdto
+    public class centralofficechitsdto
+    
     {
         public string contact_mailing_name { get; set; }
         public string subscriber_name { get; set; }
+        public string bank_ifsc_code { get; set; }
         public string bank_branch_name { get; set; }
         public string chit_receipt_number { get; set; }
         public DateTime chit_receipt_date { get; set; }
         public string bank_account_number { get; set; }
         public Int64 contact_id { get; set; }
+        public Int64 bank_id { get; set; }
     }
 
     public class UpdateAdvanceInterestBankDTO
@@ -498,7 +501,17 @@ namespace Easychit_Infrastructure.ChangeDetails
         public long AdjustedBranchId { get; set; }
         public long AdjustedChitGroupId { get; set; }
         public long AdjustedTicketNo { get; set; }
-        // public long UserId { get; set; }
+
+        //1 = Self To Adjustment
+        //2 = Adjustment To Self
+        //3 = Adjustment Group Details Change
+        public int ActionType { get; set; }
+
+        //Required for ActionType = 2
+        public long BankId { get; set; }
+        public string BankBranchName { get; set; }
+        public string BankAccountNumber { get; set; }
+        public string BankIFSCCode { get; set; }
     }
 
 }
