@@ -1,0 +1,16 @@
+**/bin/
+**/obj/
+**/.vs/
+**/.vscode/
+**/.git/
+**/.github/
+**/Log_Files/
+**/Uploads/
+**/Upload/
+**/Finsta_Exception_Logs/
+**/*.user
+**/*.suo
+**/appsettings.json
+Dockerfile
+.dockerignore
+*.md
